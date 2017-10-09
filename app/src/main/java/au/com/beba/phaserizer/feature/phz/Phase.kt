@@ -3,6 +3,7 @@ package au.com.beba.phaserizer.feature.phz
 import android.util.Log
 import io.reactivex.Flowable
 import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Callable
 import java.util.concurrent.Executor
@@ -20,6 +21,7 @@ interface PhaseConductor {
 }
 
 class BasePhaseConductor : PhaseConductor {
+    private var TAG = BasePhaseConductor::class.java.simpleName
     private var phases = mutableListOf<Phase>()
     private var phaseIndex = 0
     private var defaultErrorPhase: Phase = LogStatePhase()
@@ -52,12 +54,16 @@ class BasePhaseConductor : PhaseConductor {
     }
 
     override fun onError(failedPhase: Phase) {
+        Log.i(TAG, "Phase [%s] failed.".format(failedPhase.name))
+        Log.i(TAG, "Executing default error phase")
         defaultErrorPhase.execute()
+        Log.i(TAG, "Executing failed phase custom error phase")
         failedPhase.errorPhase?.execute()
     }
 }
 
 interface Phase {
+    var name: String
     fun setConductor(conductor: PhaseConductor): Phase
     var errorPhase: Phase?
     fun include(newTask: Task): Phase
@@ -67,10 +73,12 @@ interface Phase {
     fun execute()
 }
 
-open class DefaultPhase : Phase {
+open class DefaultPhase(override var name: String) : Phase {
     private val TAG = DefaultPhase::class.java.simpleName
     private var conductor: PhaseConductor? = null
-    private var scheduler: Scheduler? = null
+//    private var scheduler: Scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
+//    private var scheduler: Scheduler = Schedulers.from(Executors.newFixedThreadPool(1))
+    private var scheduler: Scheduler = Schedulers.io()
     private var stopPolicy: ErrorPolicy = ErrorPolicy.FIRST
     private var successPolicy: SuccessPolicy = SuccessPolicy.ALL
     private val tasks = mutableListOf<Task>()
@@ -103,20 +111,22 @@ open class DefaultPhase : Phase {
     }
 
     override fun execute() {
-        val sch = this.scheduler
-        if (sch != null) {
-            val f = Flowable.just(Any())
-            for (task in tasks) {
-                f.concatMap { Flowable.fromCallable(task.getExecutableTask()) }
-            }
+        val producers = mutableListOf<Flowable<Task>>()
+        for (task in tasks) {
+            Log.i(TAG, String.format("Queuing Task: %s ", task.name))
+            producers.add(Flowable.fromCallable(task.getExecutableTask()))
+        }
 
-            f.subscribeOn(sch)
-            f.subscribe({ n ->
+        val f = Flowable.merge(producers)
+        if (f != null) {
+            f.observeOn(AndroidSchedulers.mainThread())
+            f.subscribeOn(this.scheduler)
+            f.subscribe({ task ->
                 //ON-NEXT
-                Log.i(TAG, String.format("%s: %s", n, "ON-NEXT"))
-            }, {
+                Log.i(TAG, String.format("%s: Task[%s]", "ON-NEXT", task.name))
+            }, { error ->
                 //ON-ERROR
-                Log.i(TAG, String.format("%s: %s", "", "ON-ERROR"))
+                Log.i(TAG, String.format("%s: %s", "ON-ERROR", error.message))
                 conductor?.onError(this)
             }, {
                 //ON-COMPLETE
@@ -126,17 +136,17 @@ open class DefaultPhase : Phase {
                     conductor?.onAdvance()
                 }
             })
-        } else {
-            throw RuntimeException("Phase Executor cannot be NULL")
         }
     }
 }
 
-class LogStatePhase : DefaultPhase() {
+
+class LogStatePhase : DefaultPhase("LOG_ERROR_STATE") {
 
 }
 
-interface Task{
+interface Task {
+    var name: String
     fun getExecutableTask(): Callable<Task?>?
     fun setExecutableTask(executableTask: Callable<Task?>?): Task
     fun getExecuteResult(): Any?
@@ -151,9 +161,8 @@ interface Task{
     fun onError()
 }
 
-class AbstractTask : Task {
+class AbstractTask(override var name: String) : Task {
     private var taskResult: Any? = null
-    private var name = ""
     private var executable: Callable<Task?>? = null
     override fun setExecutableTask(executableTask: Callable<Task?>?): Task {
         this.executable = executableTask
@@ -172,9 +181,10 @@ class AbstractTask : Task {
         return taskResult
     }
 
-    fun name(name: String): Task {
-        this.name = name; return this
-    }
+//    fun name(name: String): Task {
+//        this.name = name
+//        return this
+//    }
 
     override fun critical(): Task {
         return this
@@ -202,37 +212,56 @@ enum class SuccessPolicy {
 }
 
 fun testBed() {
-
+    val TAG = "testBed"
     val singleThreadExecutor = Executors.newSingleThreadExecutor()
     val parallelThreadExecutor = Executors.newFixedThreadPool(5)
 
-    val taskExecutable: Callable<Task?> = Callable {
-        TimeUnit.SECONDS.sleep(3)
-        return@Callable null
-    }
     /**
      * APP LAUNCH
      */
     val launchConductor = BasePhaseConductor()
 
-    val taskLoadConfig = AbstractTask().name("LOAD_CONFIG").critical()
+    val taskLoadConfig = AbstractTask("LOAD_CONFIG").critical()
     taskLoadConfig.setExecutableTask(Callable {
+        Log.d(TAG, "Executing task: %s".format(taskLoadConfig.name))
         TimeUnit.SECONDS.sleep(3)
-        taskLoadConfig.setExecuteResult(55)
+        taskLoadConfig.setExecuteResult(3000)
         taskLoadConfig
     })
-    
-    val taskRefreshQuickBalance = AbstractTask().name("QUICK_BALANCE").critical().setExecutableTask(taskExecutable)
-    val taskGetNBA = AbstractTask().name("LOAD_NBA").nonCritical().setExecutableTask(taskExecutable)
-    val taskGetAEM = AbstractTask().name("LOAD_AEM").nonCritical().setExecutableTask(taskExecutable)
-    val phaseConfig = DefaultPhase()
-            .concurrencyExecutor(singleThreadExecutor)
+
+    val phaseConfig = DefaultPhase("CONFIG")
             .include(taskLoadConfig)
-    val phaseQuickData = DefaultPhase()
-            .concurrencyExecutor(parallelThreadExecutor)
+
+    /**
+     * Phase QuickData
+     */
+    val taskRefreshQuickBalance = AbstractTask("QUICK_BALANCE").critical()
+    taskRefreshQuickBalance.setExecutableTask(Callable {
+        Log.d(TAG, "Executing task: %s".format(taskRefreshQuickBalance.name))
+        TimeUnit.SECONDS.sleep(4)
+        taskRefreshQuickBalance.setExecuteResult(4000)
+        taskRefreshQuickBalance
+    })
+    val taskGetNBA = AbstractTask("LOAD_NBA").nonCritical()
+    taskGetNBA.setExecutableTask(Callable {
+        Log.d(TAG, "Executing task: %s".format(taskGetNBA.name))
+        TimeUnit.SECONDS.sleep(2)
+        taskGetNBA.setExecuteResult(2000)
+        taskGetNBA
+    })
+    val taskGetAEM = AbstractTask("LOAD_AEM").nonCritical()
+    taskGetAEM.setExecutableTask(Callable {
+        Log.d(TAG, "Executing task: %s".format(taskGetAEM.name))
+        TimeUnit.SECONDS.sleep(6)
+        taskGetAEM.setExecuteResult(6000)
+        taskGetAEM
+    })
+    val phaseQuickData = DefaultPhase("QUICK_DATA")
+//            .concurrencyExecutor(parallelThreadExecutor)
             .include(taskRefreshQuickBalance)
             .include(taskGetNBA)
             .include(taskGetAEM)
+
     launchConductor
             .withPhases(phaseConfig, phaseQuickData)
             .run() // RUN APP LAUNCH

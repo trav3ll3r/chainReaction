@@ -21,4 +21,10 @@
         android:layout_height="wrap_content"
         android:text="Test Phases"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Non-blocking UI"
+        app:layout_constraintTop_toBottomOf="@id/btn_test"/>
+
 </android.support.constraint.ConstraintLayout>
