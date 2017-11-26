@@ -13,13 +13,19 @@ interface PhaseConductor {
     fun onError(failedPhase: Phase)
 }
 
+interface PhaseStrategy {
+    enum class StrategyResult { NOTHING, SUCCESS, ERROR }
+    fun evaluate(phase: Phase): StrategyResult
+}
+
 interface Phase {
     var name: String
     fun setConductor(conductor: PhaseConductor): Phase
     var errorPhase: Phase?
     fun include(newTask: Task): Phase
-    fun errorPhaseCondition(policy: ErrorPolicy = ErrorPolicy.FIRST): Phase
-    fun advancePhaseCondition(policy: SuccessPolicy = SuccessPolicy.ALL): Phase
+    fun getTasks(): MutableList<Task>
+    fun getConductor(): PhaseConductor?
+    fun phaseStrategy(phaseStrategy: PhaseStrategy): Phase
     fun concurrencyExecutor(executor: Executor): Phase
     fun execute()
 }

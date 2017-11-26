@@ -54,13 +54,54 @@ class BasePhaseConductor : PhaseConductor {
     }
 }
 
-open class DefaultPhase(override var name: String) : Phase {
+class FirstErrorAllSuccessStrategy : PhaseStrategy {
+    override fun evaluate(phase: Phase): PhaseStrategy.StrategyResult {
+
+        var errorCount = 0
+        var successCount = 0
+        var incompleteCount = 0
+        phase.getTasks().forEach {
+            //Log.i(TAG, "ON-COMPLETE RESULT|%s|%s".format(it.name, it.getExecuteResult()))
+            when (it.getStatus()) {
+                TaskStatus.DONE_WITH_ERROR -> errorCount++
+                TaskStatus.DONE_WITH_SUCCESS -> successCount++
+                else -> incompleteCount++
+            }
+        }
+
+//        val isPhaseSuccessful = (incompleteCount <= 0) && (errorCount <= 0) && (successCount > 0)
+        if (incompleteCount == 0) {
+            val isPhaseSuccessful = (errorCount <= 0) && (successCount > 0)
+
+            val conductor = phase.getConductor()
+            if (conductor != null) {
+                if (isPhaseSuccessful) {
+                    // ADVANCE PHASE
+                    conductor.onAdvance()
+                } else {
+                    // ERROR PHASE
+                    conductor.onError(phase)
+                }
+            }
+        }
+
+        return PhaseStrategy.StrategyResult.NOTHING
+    }
+}
+
+open class DefaultPhase(override var name: String, private var phaseStrategy: PhaseStrategy = FirstErrorAllSuccessStrategy()) : Phase {
     private val TAG = "PhaseFlow.DefaultPhase"
     private var conductor: PhaseConductor? = null
     private var scheduler: Scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
-    private var stopPolicy: ErrorPolicy = ErrorPolicy.FIRST
-    private var successPolicy: SuccessPolicy = SuccessPolicy.ALL
     private val tasks = mutableListOf<Task>()
+
+    override fun getTasks(): MutableList<Task> {
+        return tasks
+    }
+
+    override fun getConductor(): PhaseConductor? {
+        return conductor
+    }
 
     override var errorPhase: Phase? = null
 
@@ -74,13 +115,8 @@ open class DefaultPhase(override var name: String) : Phase {
         return this
     }
 
-    override fun errorPhaseCondition(policy: ErrorPolicy): Phase {
-        stopPolicy = policy
-        return this
-    }
-
-    override fun advancePhaseCondition(policy: SuccessPolicy): Phase {
-        successPolicy = policy
+    override fun phaseStrategy(phaseStrategy: PhaseStrategy): Phase {
+        this.phaseStrategy = phaseStrategy
         return this
     }
 
@@ -106,38 +142,22 @@ open class DefaultPhase(override var name: String) : Phase {
                 //ON-NEXT
                 Log.i(TAG, String.format("%s: Task[%s|%s]", "ON-NEXT", task.getExecuteResult(), task.name))
                 task.onSuccess()
+                evaluatePhase()
             }, { error ->
                 //ON-ERROR
                 Log.i(TAG, String.format("%s: %s", "ON-ERROR", error.message))
-                conductor?.onError(this)
+//                conductor?.onError(this)
+                evaluatePhase()
             }, {
                 //ON-COMPLETE
                 Log.i(TAG, "ON-COMPLETE")
-
-                var errorCount = 0
-                var successCount = 0
-                var incompleteCount = 0
-                tasks.forEach {
-                    //Log.i(TAG, "ON-COMPLETE RESULT|%s|%s".format(it.name, it.getExecuteResult()))
-                    when (it.getStatus()) {
-                        TaskStatus.DONE_WITH_ERROR -> errorCount++
-                        TaskStatus.DONE_WITH_SUCCESS -> successCount++
-                        else -> incompleteCount++
-                    }
-                }
-
-                val isPhaseSuccessful = (incompleteCount <= 0) && (errorCount <= 0) && (successCount > 0)
-
-                if (conductor != null) {
-                    if (isPhaseSuccessful) {
-                        // ADVANCE PHASE
-                        conductor?.onAdvance()
-                    } else {
-                        // ERROR PHASE
-                        conductor?.onError(this)
-                    }
-                }
             })
+        }
+    }
+
+    private fun evaluatePhase() {
+        when (this.phaseStrategy.evaluate(this)) {
+
         }
     }
 }
