@@ -2,15 +2,14 @@ package au.com.beba.phaserizer.feature.reactors
 
 import au.com.beba.phaserizer.feature.ConsoleLogger
 
-
-class LoggingInReactor : BaseChainReaction() {
+class LoggingInReaction : BaseChainReaction() {
     companion object {
-        private val TAG = LoggingInReactor::class.java.simpleName
+        private val TAG = LoggingInReaction::class.java.simpleName
     }
 
     override fun getLinkTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ReactorCallback) {
+            override fun run(callback: ChainTask.ReactorTaskCallback) {
                 val status = ChainReactionCallback.Status.SUCCESS
                 val taskResult = "L"
                 ConsoleLogger.log("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))
@@ -20,14 +19,14 @@ class LoggingInReactor : BaseChainReaction() {
     }
 }
 
-class SignInReactor : BaseChainReaction() {
+class SignInReaction : BaseChainReaction() {
     companion object {
-        private val TAG = SignInReactor::class.java.simpleName
+        private val TAG = SignInReaction::class.java.simpleName
     }
 
     override fun getLinkTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ReactorCallback) {
+            override fun run(callback: ChainTask.ReactorTaskCallback) {
                 val status = ChainReactionCallback.Status.SUCCESS
                 val taskResult = "S"
                 ConsoleLogger.log("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))
@@ -38,14 +37,14 @@ class SignInReactor : BaseChainReaction() {
     }
 }
 
-class PostSignInReactor : BaseChainReaction() {
+class PostSignInReaction : BaseChainReaction() {
     companion object {
-        private val TAG = PostSignInReactor::class.java.simpleName
+        private val TAG = PostSignInReaction::class.java.simpleName
     }
 
     override fun getLinkTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ReactorCallback) {
+            override fun run(callback: ChainTask.ReactorTaskCallback) {
                 val status = ChainReactionCallback.Status.SUCCESS
                 val taskResult = "PS"
                 ConsoleLogger.log("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))

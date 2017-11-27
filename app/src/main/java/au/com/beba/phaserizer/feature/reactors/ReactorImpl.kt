@@ -37,24 +37,22 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
         result = value
     }
 
-    private val reactorCallback = object : ReactorCallback {
-        override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
-            ConsoleLogger.log("{%s} reactorCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
-            setReactionResult(taskResult)
-//            callback.onDone(status)
-        }
-    }
-
-//    private val callback = object : ChainReactionCallback {
-//        override fun onDone(status: ChainReactionCallback.Status) {
-//            ConsoleLogger.log("{%s} onDone".format("CHAIN-REACTION"))
+//    private val reactorTaskCallback = object : ChainTask.ReactorTaskCallback {
+//        override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
+//            ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
+//            setReactionResult(taskResult)
 //        }
 //    }
 
     override fun startReaction(callback: ChainReactionCallback) {
         chainReactionCallback = callback
         // RUN Reactor's TASK
-        getLinkTask().run(reactorCallback)
+        getLinkTask().run(object : ChainTask.ReactorTaskCallback {
+            override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
+                ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
+                setReactionResult(taskResult)
+            }
+        })
 
         // RUN Reactor Links TASKS
         if (links.isEmpty()) {

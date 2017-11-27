@@ -23,12 +23,12 @@ interface ChainReactionCallback {
     }
 }
 
-interface ReactorCallback {
-    fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?)
-}
-
 interface ChainTask {
-    fun run(callback: ReactorCallback)
+    interface ReactorTaskCallback {
+        fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?)
+    }
+
+    fun run(callback: ReactorTaskCallback)
 }
 
 class Reaction(val type: String, val task: (Any?) -> (Any?))

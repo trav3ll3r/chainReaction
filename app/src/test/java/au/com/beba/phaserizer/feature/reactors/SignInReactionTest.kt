@@ -4,12 +4,12 @@ import au.com.beba.phaserizer.feature.ConsoleLogger
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class SignInReactorTest {
+class SignInReactionTest {
     @Test
     fun testSignIn() {
-        val l = LoggingInReactor()
-        val s = SignInReactor()
-        val ps = PostSignInReactor()
+        val l = LoggingInReaction()
+        val s = SignInReaction()
+        val ps = PostSignInReaction()
 
         l.addToChain(s)
         l.addToChain(ps)
