@@ -14,8 +14,8 @@ interface Reactor {
     fun react(reactions: List<Reaction>)
 }
 
-interface ChainTaskCallback {
-    fun onTaskCompleted(status: Status)
+interface ChainReactionCallback {
+    fun onDone(status: ChainReactionCallback.Status)
 
     enum class Status {
         ERROR,
@@ -23,12 +23,12 @@ interface ChainTaskCallback {
     }
 }
 
-interface RectorCallback {
-    fun onResult(task: ChainTask, status: ChainTaskCallback.Status, taskResult: Any?)
+interface ReactorCallback {
+    fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?)
 }
 
 interface ChainTask {
-    fun run(callback: RectorCallback)
+    fun run(callback: ReactorCallback)
 }
 
 class Reaction(val type: String, val task: (Any?) -> (Any?))
@@ -37,12 +37,12 @@ interface ChainReaction {
     fun addToChain(chain: ChainReaction)
     fun addReaction(reaction: Reaction)
     fun getLinkTask(): ChainTask
-    fun startReaction()
+    fun startReaction(callback: ChainReactionCallback)
     fun getReactionResult(): Any?
 }
 
 open class DefaultReactor : Reactor {
     override fun react(reactions: List<Reaction>) {
-        reactions.forEach { it.task }
+        reactions.forEach { it.task.invoke(Unit) }
     }
 }
