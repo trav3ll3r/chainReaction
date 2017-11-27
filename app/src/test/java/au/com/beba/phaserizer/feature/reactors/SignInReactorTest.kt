@@ -1,14 +1,9 @@
 package au.com.beba.phaserizer.feature.reactors
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class SignInReactorTest {
-//    @Test
-//    fun simpleTest() {
-//        assertTrue(true)
-//    }
-
     @Test
     fun testSignIn() {
         val l = LoggingInReactor()

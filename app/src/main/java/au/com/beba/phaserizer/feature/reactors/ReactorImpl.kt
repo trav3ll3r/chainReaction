@@ -2,14 +2,14 @@ package au.com.beba.phaserizer.feature.reactors
 
 import android.util.Log
 
-abstract class BaseChainReaction(protected val reactor: Reactor = DefaultReactor()) : ChainReaction {
+abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()) : ChainReaction {
     companion object {
         val TAG = BaseChainReaction::class.java.simpleName
     }
 
-    protected var result: Any? = null
-    protected val links: MutableList<ChainReaction> = mutableListOf()
-    protected val reactions: MutableList<Reaction> = mutableListOf()
+    private var result: Any? = null
+    private val links: MutableList<ChainReaction> = mutableListOf()
+    private val reactions: MutableList<Reaction> = mutableListOf()
 
     init {
         reactions.add(Reaction(type = "LOGGER", task = { Log.d("TAG", "") }))
@@ -24,6 +24,7 @@ abstract class BaseChainReaction(protected val reactor: Reactor = DefaultReactor
     }
 
     override fun getReactionResult(): Any? {
+        println("reactor: getReactionResult | taskResult=%s".format(result))
         return result
     }
 
@@ -47,19 +48,11 @@ abstract class BaseChainReaction(protected val reactor: Reactor = DefaultReactor
     }
 
     override fun startReaction() {
-        val list = mutableListOf<ChainTask>()
-
-        result = "BASE_CHAIN_REACTION"
-
         // RUN Reactor TASK
         getLinkTask().run(reactorCallback)
 
         links.forEach {
-            list.add(it.getLinkTask())
-        }
-
-        list.forEach {
-            it.run(reactorCallback)
+            it.startReaction()
         }
 
         reactor.react(reactions)

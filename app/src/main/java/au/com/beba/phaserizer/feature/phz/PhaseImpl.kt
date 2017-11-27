@@ -157,7 +157,9 @@ open class DefaultPhase(override var name: String, private var phaseStrategy: Ph
 
     private fun evaluatePhase() {
         when (this.phaseStrategy.evaluate(this)) {
-
+            PhaseStrategy.StrategyResult.SUCCESS-> {}
+            PhaseStrategy.StrategyResult.ERROR-> {}
+            PhaseStrategy.StrategyResult.NOTHING -> {}
         }
     }
 }

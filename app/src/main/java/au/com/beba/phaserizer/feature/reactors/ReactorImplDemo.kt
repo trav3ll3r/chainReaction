@@ -9,8 +9,9 @@ class LoggingInReactor : BaseChainReaction() {
         return object : ChainTask {
             override fun run(callback: RectorCallback) {
                 val status = ChainTaskCallback.Status.SUCCESS
-                println("%s: Running task with %s status".format(TAG, status))
-                callback.onResult(this, status, "L")
+                val taskResult = "L"
+                println("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))
+                callback.onResult(this, status, taskResult)
             }
         }
     }
@@ -25,7 +26,8 @@ class SignInReactor : BaseChainReaction() {
         return object : ChainTask {
             override fun run(callback: RectorCallback) {
                 val status = ChainTaskCallback.Status.SUCCESS
-                println("%s: Running task with %s status".format(TAG, status))
+                val taskResult = "S"
+                println("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))
                 callback.onResult(this, status, "S")
             }
         }
@@ -41,7 +43,8 @@ class PostSignInReactor : BaseChainReaction() {
         return object : ChainTask {
             override fun run(callback: RectorCallback) {
                 val status = ChainTaskCallback.Status.SUCCESS
-                println("%s: Running task with %s status".format(TAG, status))
+                val taskResult = "PS"
+                println("%s: Running task with status=[%s] and result=[%s]".format(TAG, status, taskResult))
                 callback.onResult(this, status, "PS")
             }
         }
