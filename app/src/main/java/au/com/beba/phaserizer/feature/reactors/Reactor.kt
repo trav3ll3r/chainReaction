@@ -18,6 +18,7 @@ interface ChainReactionCallback {
     fun onDone(status: ChainReactionCallback.Status)
 
     enum class Status {
+        NOT_STARTED,
         ERROR,
         SUCCESS
     }
@@ -39,6 +40,8 @@ interface ChainReaction {
     fun getLinkTask(): ChainTask
     fun startReaction(callback: ChainReactionCallback)
     fun getReactionResult(): Any?
+    fun getReactionStatus(): ChainReactionCallback.Status
+    fun setReactionStatus(status: ChainReactionCallback.Status)
 }
 
 open class DefaultReactor : Reactor {

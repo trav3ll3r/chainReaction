@@ -8,6 +8,7 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
     }
 
     private var result: Any? = null
+    private var status = ChainReactionCallback.Status.NOT_STARTED
     private val links: MutableList<ChainReaction> = mutableListOf()
     private val reactions: MutableList<Reaction> = mutableListOf()
 
@@ -32,6 +33,16 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
         return result
     }
 
+    override fun getReactionStatus(): ChainReactionCallback.Status {
+        ConsoleLogger.log("{%s} getReactionStatus | status=%s".format("CHAIN-REACTION", status))
+        return this.status
+    }
+
+    override fun setReactionStatus(status: ChainReactionCallback.Status) {
+        ConsoleLogger.log("{%s} setReactionStatus | status=%s".format("CHAIN-REACTION", status))
+        this.status = status
+    }
+
     private fun setReactionResult(value: Any?) {
         ConsoleLogger.log("{%s} setReactionResult: task=%s | taskResult=%s".format("CHAIN-REACTION", this::class.java.simpleName, value))
         result = value
@@ -46,7 +57,7 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
 
     override fun startReaction(callback: ChainReactionCallback) {
         chainReactionCallback = callback
-        // RUN Reactor's TASK
+        // RUN Reactions's TASK
         getLinkTask().run(object : ChainTask.ReactorTaskCallback {
             override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
                 ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
