@@ -1,0 +1,36 @@
+@startuml
+	|MainPhases|
+	start
+	partition PhaseA {
+		:taskA1;
+		:taskA2;
+		:taskA3;
+
+		'"PhaseA.error" --> "ERROR"
+		'"PhaseA.success" --> "SUCCESS"
+	}
+
+	partition PhaseB {
+		fork
+		:taskB1;
+		fork again
+		:taskB2;
+
+		|DefaultError|
+		partition DefaultErrorPhase {
+			:taskError1;
+			:taskError2;
+		}
+		|PhaseError|
+		:taskB1-E1;
+		:taskB1-E2;
+		detach
+
+		end fork
+	}
+	|MainPhases|
+	end
+
+	
+
+@enduml
