@@ -14,11 +14,12 @@ interface Reactor {
     fun react(reactions: List<Reaction>)
 }
 
-interface ChainReactionCallback {
-    fun onDone(status: ChainReactionCallback.Status)
+interface ChainCallback {
+    fun onDone(status: ChainCallback.Status)
 
     enum class Status {
         NOT_STARTED,
+        IN_PROGRESS,
         ERROR,
         SUCCESS
     }
@@ -26,7 +27,7 @@ interface ChainReactionCallback {
 
 interface ChainTask {
     interface ReactorTaskCallback {
-        fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?)
+        fun onResult(task: ChainTask, status: ChainCallback.Status, taskResult: Any?)
     }
 
     fun run(callback: ReactorTaskCallback)
@@ -34,17 +35,17 @@ interface ChainTask {
 
 class Reaction(val type: String, val task: (Any?) -> (Any?))
 
-interface ChainReaction {
-    fun addToChain(chain: ChainReaction)
+interface Chain {
+    fun addToChain(chain: Chain)
     fun addReaction(reaction: Reaction)
-    fun getLinkTask(): ChainTask
-    fun startReaction(callback: ChainReactionCallback)
+    fun getChainTask(): ChainTask
+    fun startChain(callback: ChainCallback)
     fun getChainResult(): Any?
-    fun getChainStatus(): ChainReactionCallback.Status
-    fun setChainStatus(status: ChainReactionCallback.Status)
+    fun getChainStatus(): ChainCallback.Status
+    fun setChainStatus(newStatus: ChainCallback.Status)
 }
 
-open class DefaultReactor : Reactor {
+class DefaultReactor : Reactor {
     override fun react(reactions: List<Reaction>) {
         reactions.forEach { it.task.invoke(Unit) }
     }

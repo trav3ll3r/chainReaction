@@ -9,11 +9,12 @@ class SignInReactionTest {
     fun testSignIn() {
         val l = LoggingInChain()
         val s = SignInChain()
-        s.addReaction(Reaction(type = "SIGN-IN", task = {
-            if (s.getChainResult() == "S") {
-                s.setChainStatus(ChainReactionCallback.Status.SUCCESS)
-            }
-        }))
+//        s.addReaction(Reaction(type = "SIGN-IN", task = {
+//            ConsoleLogger.log("SignInTAG","******** REACTION SIGN-IN ********")
+//            if (s.getChainResult() == "S") {
+//                s.setChainStatus(ChainCallback.Status.SUCCESS)
+//            }
+//        }))
         val ps = PostSignInChain()
 
         l.addToChain(s)
@@ -22,26 +23,27 @@ class SignInReactionTest {
         ps.addToChain(GetAccountsChain())
         ps.addToChain(GetCardsChain())
 
-        val chainReactionCallback = object : ChainReactionCallback {
-            override fun onDone(status: ChainReactionCallback.Status) {
+        val chainReactionCallback = object : ChainCallback {
+            override fun onDone(status: ChainCallback.Status) {
                 ConsoleLogger.log("--- ASSERT START ---")
                 // ASSERT L
                 assertEquals("L", l.getChainResult())
-                assertEquals(ChainReactionCallback.Status.NOT_STARTED, l.getChainStatus())
+                assertEquals(ChainCallback.Status.SUCCESS, l.getChainStatus())
 
                 // ASSERT S
                 assertEquals("S", s.getChainResult())
-                assertEquals(ChainReactionCallback.Status.SUCCESS, s.getChainStatus())
+                assertEquals(ChainCallback.Status.SUCCESS, s.getChainStatus())
 
                 // ASSERT PS
                 assertEquals("PS", ps.getChainResult())
+                assertEquals(ChainCallback.Status.SUCCESS, ps.getChainStatus())
 
                 ConsoleLogger.log("--- ASSERT DONE ---")
             }
         }
 
         ConsoleLogger.log("--- START ---")
-        l.startReaction(chainReactionCallback)
+        l.startChain(chainReactionCallback)
         ConsoleLogger.log("--- END ---")
     }
 }

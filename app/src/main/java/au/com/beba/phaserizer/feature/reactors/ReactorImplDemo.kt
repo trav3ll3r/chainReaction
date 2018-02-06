@@ -2,13 +2,13 @@ package au.com.beba.phaserizer.feature.reactors
 
 import au.com.beba.phaserizer.feature.ConsoleLogger
 
-class LoggingInChain : BaseChainReaction() {
+class LoggingInChain : BaseChain() {
     override val TAG = LoggingInChain::class.java.simpleName
 
-    override fun getLinkTask(): ChainTask {
+    override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ReactorTaskCallback) {
-                val status = ChainReactionCallback.Status.SUCCESS
+                val status = ChainCallback.Status.SUCCESS
                 val taskResult = "L"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 callback.onResult(this, status, taskResult)
@@ -17,13 +17,13 @@ class LoggingInChain : BaseChainReaction() {
     }
 }
 
-class SignInChain : BaseChainReaction() {
+class SignInChain : BaseChain() {
     override val TAG = SignInChain::class.java.simpleName
 
-    override fun getLinkTask(): ChainTask {
+    override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ReactorTaskCallback) {
-                val status = ChainReactionCallback.Status.SUCCESS
+                val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 Thread.sleep(1000)
@@ -33,13 +33,13 @@ class SignInChain : BaseChainReaction() {
     }
 }
 
-class GetAccountsChain : BaseChainReaction() {
+class GetAccountsChain : BaseChain() {
     override val TAG = GetAccountsChain::class.java.simpleName
 
-    override fun getLinkTask(): ChainTask {
+    override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ReactorTaskCallback) {
-                val status = ChainReactionCallback.Status.SUCCESS
+                val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S-GA"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 Thread.sleep(300)
@@ -49,13 +49,13 @@ class GetAccountsChain : BaseChainReaction() {
     }
 }
 
-class GetCardsChain : BaseChainReaction() {
+class GetCardsChain : BaseChain() {
     override val TAG = GetCardsChain::class.java.simpleName
 
-    override fun getLinkTask(): ChainTask {
+    override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ReactorTaskCallback) {
-                val status = ChainReactionCallback.Status.SUCCESS
+                val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S-GC"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 Thread.sleep(400)
@@ -65,13 +65,13 @@ class GetCardsChain : BaseChainReaction() {
     }
 }
 
-class PostSignInChain : BaseChainReaction() {
+class PostSignInChain : BaseChain() {
     override val TAG = PostSignInChain::class.java.simpleName
 
-    override fun getLinkTask(): ChainTask {
+    override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ReactorTaskCallback) {
-                val status = ChainReactionCallback.Status.SUCCESS
+                val status = ChainCallback.Status.SUCCESS
                 val taskResult = "PS"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 Thread.sleep(1500)
