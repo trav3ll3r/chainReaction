@@ -7,31 +7,34 @@ import org.junit.Test
 class SignInReactionTest {
     @Test
     fun testSignIn() {
-        val l = LoggingInReaction()
-        val s = SignInReaction()
+        val l = LoggingInChain()
+        val s = SignInChain()
         s.addReaction(Reaction(type = "SIGN-IN", task = {
-            if (s.getReactionResult() == "S") {
-                s.setReactionStatus(ChainReactionCallback.Status.SUCCESS)
+            if (s.getChainResult() == "S") {
+                s.setChainStatus(ChainReactionCallback.Status.SUCCESS)
             }
         }))
-        val ps = PostSignInReaction()
+        val ps = PostSignInChain()
 
         l.addToChain(s)
         l.addToChain(ps)
+
+        ps.addToChain(GetAccountsChain())
+        ps.addToChain(GetCardsChain())
 
         val chainReactionCallback = object : ChainReactionCallback {
             override fun onDone(status: ChainReactionCallback.Status) {
                 ConsoleLogger.log("--- ASSERT START ---")
                 // ASSERT L
-                assertEquals("L", l.getReactionResult())
-                assertEquals(ChainReactionCallback.Status.NOT_STARTED, l.getReactionStatus())
+                assertEquals("L", l.getChainResult())
+                assertEquals(ChainReactionCallback.Status.NOT_STARTED, l.getChainStatus())
 
                 // ASSERT S
-                assertEquals("S", s.getReactionResult())
-                assertEquals(ChainReactionCallback.Status.SUCCESS, s.getReactionStatus())
+                assertEquals("S", s.getChainResult())
+                assertEquals(ChainReactionCallback.Status.SUCCESS, s.getChainStatus())
 
                 // ASSERT PS
-                assertEquals("PS", ps.getReactionResult())
+                assertEquals("PS", ps.getChainResult())
 
                 ConsoleLogger.log("--- ASSERT DONE ---")
             }

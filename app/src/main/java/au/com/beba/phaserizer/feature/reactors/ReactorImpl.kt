@@ -3,9 +3,7 @@ package au.com.beba.phaserizer.feature.reactors
 import au.com.beba.phaserizer.feature.ConsoleLogger
 
 abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()) : ChainReaction {
-    companion object {
-        val TAG = BaseChainReaction::class.java.simpleName
-    }
+    protected open val TAG = BaseChainReaction::class.java.simpleName
 
     private var result: Any? = null
     private var status = ChainReactionCallback.Status.NOT_STARTED
@@ -16,7 +14,7 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
 
     init {
         reactions.add(Reaction(type = "LOGGER", task = {
-            ConsoleLogger.log("{%s} %s %s".format("REACTION", TAG, "LOGGER"))
+            ConsoleLogger.log(TAG, "{%s} %s".format("REACTION", "LOGGER"))
         }))
     }
 
@@ -28,40 +26,41 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
         reactions.add(reaction)
     }
 
-    override fun getReactionResult(): Any? {
-        ConsoleLogger.log("{%s} getReactionResult | taskResult=%s".format("CHAIN-REACTION", result))
+    override fun getChainResult(): Any? {
+        ConsoleLogger.log(TAG, "{%s} getChainResult | taskResult=%s".format("CHAIN", result))
         return result
     }
 
-    override fun getReactionStatus(): ChainReactionCallback.Status {
-        ConsoleLogger.log("{%s} getReactionStatus | status=%s".format("CHAIN-REACTION", status))
+    private fun setChainResult(value: Any?) {
+        ConsoleLogger.log(TAG, "{%s} setChainResult: task=%s | taskResult=%s".format("CHAIN", this::class.java.simpleName, value))
+        result = value
+    }
+
+    override fun getChainStatus(): ChainReactionCallback.Status {
+        ConsoleLogger.log(TAG, "{%s} getChainStatus | status=%s".format("CHAIN", status))
         return this.status
     }
 
-    override fun setReactionStatus(status: ChainReactionCallback.Status) {
-        ConsoleLogger.log("{%s} setReactionStatus | status=%s".format("CHAIN-REACTION", status))
+    override fun setChainStatus(status: ChainReactionCallback.Status) {
+        ConsoleLogger.log(TAG, "{%s} setChainStatus | status=%s".format("CHAIN", status))
         this.status = status
-    }
-
-    private fun setReactionResult(value: Any?) {
-        ConsoleLogger.log("{%s} setReactionResult: task=%s | taskResult=%s".format("CHAIN-REACTION", this::class.java.simpleName, value))
-        result = value
     }
 
 //    private val reactorTaskCallback = object : ChainTask.ReactorTaskCallback {
 //        override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
 //            ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
-//            setReactionResult(taskResult)
+//            setChainResult(taskResult)
 //        }
 //    }
 
     override fun startReaction(callback: ChainReactionCallback) {
+        ConsoleLogger.log(TAG, "{%s} startReaction".format("CHAIN"))
         chainReactionCallback = callback
         // RUN Reactions's TASK
         getLinkTask().run(object : ChainTask.ReactorTaskCallback {
             override fun onResult(task: ChainTask, status: ChainReactionCallback.Status, taskResult: Any?) {
-                ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
-                setReactionResult(taskResult)
+                ConsoleLogger.log(TAG, "{%s} chainReactionCallback: onResult | task=%s | taskResult=%s".format("CHAIN", task::class.java.simpleName, taskResult))
+                setChainResult(taskResult)
             }
         })
 
@@ -77,17 +76,23 @@ abstract class BaseChainReaction(private val reactor: Reactor = DefaultReactor()
 
     private val internalChainReactionCallback = object : ChainReactionCallback {
         override fun onDone(status: ChainReactionCallback.Status) {
+            ConsoleLogger.log(TAG, "{%s} internalChainReactionCallback | onDone | start".format("CHAIN"))
             //RUN REACTIONS
+            ConsoleLogger.log(TAG, "{%s} internalChainReactionCallback | onDone | run reactions".format("CHAIN"))
             reactor.react(reactions)
 
             //TODO: CHECK "END" CONDITIONS
-            if (links.count { it.getReactionResult() == null } == 0) {
+            if (links.count { it.getChainResult() == null } == 0) {
+                ConsoleLogger.log(TAG, "{%s} internalChainReactionCallback | onDone | all chain links have a result".format("CHAIN"))
                 //TODO: CALL PARENT chainReactionCallback
                 val finalStatus = ChainReactionCallback.Status.SUCCESS
                 chainReactionCallback.onDone(finalStatus)
             } else {
-                // WAIT FOR ALL LINKS TO REPORT BACK
+                // WAIT FOR ALL Chain Links TO REPORT BACK (OBTAIN RESULT)
+                ConsoleLogger.log(TAG, "{%s} internalChainReactionCallback | onDone | waiting for all chain links to obtain result".format("CHAIN"))
             }
+
+            ConsoleLogger.log(TAG, "{%s} internalChainReactionCallback | onDone | finish".format("CHAIN"))
         }
     }
 }
