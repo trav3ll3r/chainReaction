@@ -45,18 +45,6 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
                     ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(REACTION_TAG, unfinishedLinks))
                 }
             }
-
-//            // RUN Chain's Links OR Finish THIS CHAIN
-//            ConsoleLogger.log(TAG, "startChain | Links or Finish")
-//            if (links.isEmpty()) {
-//                ConsoleLogger.log(TAG, "startChain | Finish")
-//                childChainCallback.onDone(ChainCallback.Status.SUCCESS)
-//            } else {
-//                ConsoleLogger.log(TAG, "startChain | run Links")
-//                links.forEach {
-//                    it.startChain(childChainCallback)
-//                }
-//            }
         }))
 
     }
