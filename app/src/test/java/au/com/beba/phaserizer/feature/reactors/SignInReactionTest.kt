@@ -2,11 +2,14 @@ package au.com.beba.phaserizer.feature.reactors
 
 import au.com.beba.phaserizer.feature.ConsoleLogger
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SignInReactionTest {
     @Test
     fun testSignIn() {
+        var callbackExecuted = false
+
         val l = LoggingInChain()
         val s = SignInChain()
 //        s.addReaction(Reaction(type = "SIGN-IN", task = {
@@ -25,6 +28,7 @@ class SignInReactionTest {
 
         val chainReactionCallback = object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
+                callbackExecuted = true
                 ConsoleLogger.log("--- ASSERT START ---")
                 // ASSERT L
                 assertEquals("L", l.getChainResult())
@@ -44,6 +48,8 @@ class SignInReactionTest {
 
         ConsoleLogger.log("--- START ---")
         l.startChain(chainReactionCallback)
+        assertTrue(callbackExecuted)
         ConsoleLogger.log("--- END ---")
+
     }
 }

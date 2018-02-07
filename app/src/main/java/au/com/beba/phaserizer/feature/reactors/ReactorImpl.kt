@@ -18,30 +18,31 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
         }))
 
         reactions.add(Reaction(type = "FINISH_OR_LINKS", task = {
-            ConsoleLogger.log(TAG, "{%s} %s".format("REACTION", "FINISH_OR_LINKS"))
+            val REACTION_TAG = "FINISH_OR_LINKS"
+            ConsoleLogger.log(TAG, "{%s}".format(REACTION_TAG))
 
             //TODO: CHECK "END" CONDITIONS
-            val linksWithoutResultCount = links.count { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED, ChainCallback.Status.IN_PROGRESS) }
+            val unfinishedLinks = links.count { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED, ChainCallback.Status.IN_PROGRESS) }
 
-            if (linksWithoutResultCount == 0) {
-                ConsoleLogger.log(TAG, "{%s} %s".format("REACTION", "all chain links have a result"))
+            if (unfinishedLinks == 0) {
+                ConsoleLogger.log(TAG, "{%s} %s".format(REACTION_TAG, "all chain links have a result"))
                 val finalStatus = ChainCallback.Status.SUCCESS // TODO: CALCULATE
 
-                ConsoleLogger.log(TAG, "{%s} notifying parent via chainCallback".format("REACTION"))
+                ConsoleLogger.log(TAG, "{%s} notifying parent via chainCallback".format(REACTION_TAG))
 
                 // NOTIFY PARENT chainCallback
                 chainCallback.onDone(finalStatus)
             } else {
-                ConsoleLogger.log(TAG, "{%s} not all Links have result yet".format("REACTION"))
+                ConsoleLogger.log(TAG, "{%s} not all Links have result yet".format(REACTION_TAG))
 
                 // RUN NEXT NOT_STARTED LINK
                 val nextLink = links.find { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
                 if (nextLink != null) {
-                    ConsoleLogger.log(TAG, "{%s} starting not started Link %s".format("REACTION", nextLink.javaClass.simpleName))
+                    ConsoleLogger.log(TAG, "{%s} starting not started Link %s".format(REACTION_TAG, nextLink.javaClass.simpleName))
                     nextLink.startChain(childChainCallback)
                 } else {
                     // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
-                    ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format("REACTION", linksWithoutResultCount))
+                    ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(REACTION_TAG, unfinishedLinks))
                 }
             }
 
@@ -88,7 +89,7 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
         this.status = newStatus
     }
 
-//    private val reactorTaskCallback = object : ChainTask.ReactorTaskCallback {
+//    private val reactorTaskCallback = object : ChainTask.ChainTaskCallback {
 //        override fun onResult(task: ChainTask, status: ChainCallback.Status, taskResult: Any?) {
 //            ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
 //            setChainResult(taskResult)
@@ -102,10 +103,11 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
         // RUN ChainTask (MAIN TASK)
         ConsoleLogger.log(TAG, "startChain | run MainTask")
         setChainStatus(ChainCallback.Status.IN_PROGRESS)
-        getChainTask().run(object : ChainTask.ReactorTaskCallback {
-            override fun onResult(task: ChainTask, status: ChainCallback.Status, taskResult: Any?) {
+        getChainTask().run(object : ChainTask.ChainTaskCallback {
+            override fun onResult(task: ChainTask, newStatus: ChainCallback.Status, taskResult: Any?) {
                 ConsoleLogger.log(TAG, "chainCallback: onResult | task=%s | taskResult=%s".format(task::class.java.simpleName, taskResult))
                 setChainResult(taskResult)
+                setChainStatus(newStatus)
             }
         })
 

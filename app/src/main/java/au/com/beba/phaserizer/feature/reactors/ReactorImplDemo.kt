@@ -7,10 +7,11 @@ class LoggingInChain : BaseChain() {
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ChainTask.ReactorTaskCallback) {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
                 val taskResult = "L"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
+                Thread.sleep(800)
                 callback.onResult(this, status, taskResult)
             }
         }
@@ -22,7 +23,7 @@ class SignInChain : BaseChain() {
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ChainTask.ReactorTaskCallback) {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
@@ -38,7 +39,7 @@ class GetAccountsChain : BaseChain() {
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ChainTask.ReactorTaskCallback) {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S-GA"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
@@ -54,7 +55,7 @@ class GetCardsChain : BaseChain() {
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ChainTask.ReactorTaskCallback) {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
                 val taskResult = "S-GC"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
@@ -70,7 +71,7 @@ class PostSignInChain : BaseChain() {
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
-            override fun run(callback: ChainTask.ReactorTaskCallback) {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
                 val taskResult = "PS"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
