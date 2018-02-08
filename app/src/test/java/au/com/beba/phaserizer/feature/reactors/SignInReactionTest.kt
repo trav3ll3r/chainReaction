@@ -7,7 +7,7 @@ import org.junit.Test
 
 class SignInReactionTest {
     @Test
-    fun testSignIn() {
+    fun testBaseChain() {
         var callbackExecuted = false
 
         val l = LoggingInChain()
@@ -23,8 +23,10 @@ class SignInReactionTest {
         l.addToChain(s)
         l.addToChain(ps)
 
-        ps.addToChain(GetAccountsChain())
-        ps.addToChain(GetCardsChain())
+        val sga = GetAccountsChain()
+        val sgc = GetCardsChain()
+        ps.addToChain(sga)
+        ps.addToChain(sgc)
 
         val chainReactionCallback = object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
@@ -37,6 +39,14 @@ class SignInReactionTest {
                 // ASSERT S
                 assertEquals("S", s.getChainResult())
                 assertEquals(ChainCallback.Status.SUCCESS, s.getChainStatus())
+
+                // ASSERT S-GA
+                assertEquals("S-GA", sga.getChainResult())
+                assertEquals(ChainCallback.Status.SUCCESS, sga.getChainStatus())
+
+                // ASSERT S-GC
+                assertEquals("S-GC", sgc.getChainResult())
+                assertEquals(ChainCallback.Status.SUCCESS, sgc.getChainStatus())
 
                 // ASSERT PS
                 assertEquals("PS", ps.getChainResult())

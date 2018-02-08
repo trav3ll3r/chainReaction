@@ -1,13 +1,19 @@
 @startuml
 
-    start --> [PreTasks]
-	[PreTasks] -right-> [MainTask] : then
-	[MainTask] -right-> [PostTasks] : then
-	[PostTasks] -right-> [Links] : then
+    start --> [PreMainTasks]
+	[PreMainTasks] -right-> [MainTask] : then
+	[MainTask] -right-> [PostMainTasks] : then
+	[PostMainTasks] --> [Links] : then
 
-	[Links] -right-> [Reactions] : then
+	[Links] --> [Reactions] : then
 
-	[Reactions] .down.> [DECISION]  : then
-	[DECISION]  .right.> [Links] : then
-	[DECISION]  ..> end : call-parent
+	[Reactions] -down-> [DECISION]  : then
+	[DECISION] .right.> [Links] : not-done
+
+
+	[DECISION] ..> [CALL_PARENT] : done
+	[PreMainTasks] ..> [CALL_PARENT] : skip-main-task
+	[PostMainTasks] ..> [CALL_PARENT] : skip-links
+
+	[CALL_PARENT] ..> end
 @enduml
