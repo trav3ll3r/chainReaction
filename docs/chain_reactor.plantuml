@@ -1,0 +1,13 @@
+@startuml
+
+    start --> [PreTasks]
+	[PreTasks] -right-> [MainTask] : then
+	[MainTask] -right-> [PostTasks] : then
+	[PostTasks] -right-> [Links] : then
+
+	[Links] -right-> [Reactions] : then
+
+	[Reactions] .down.> [DECISION]  : then
+	[DECISION]  .right.> [Links] : then
+	[DECISION]  ..> end : call-parent
+@enduml

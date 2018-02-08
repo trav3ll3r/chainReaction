@@ -10,9 +10,10 @@ package au.com.beba.phaserizer.feature.reactors
 //    var critical: Boolean = false
 //}
 
-interface Reactor {
-    fun react(reactions: List<Reaction>)
-}
+//interface Reactor {
+//    fun react(reactions: List<Reaction>)
+//    fun continueOrFinish()
+//}
 
 interface ChainCallback {
     fun onDone(status: ChainCallback.Status)
@@ -27,7 +28,7 @@ interface ChainCallback {
 
 interface ChainTask {
     interface ChainTaskCallback {
-        fun onResult(task: ChainTask, status: ChainCallback.Status, taskResult: Any?)
+        fun onResult(task: ChainTask, newStatus: ChainCallback.Status, taskResult: Any?)
     }
 
     fun run(callback: ChainTaskCallback)
@@ -38,15 +39,22 @@ class Reaction(val type: String, val task: (Any?) -> (Any?))
 interface Chain {
     fun addToChain(chain: Chain)
     fun addReaction(reaction: Reaction)
-    fun getChainTask(): ChainTask
+
     fun startChain(callback: ChainCallback)
+    fun getChainTask(): ChainTask
+    fun reactions()
+    fun decision()
+
     fun getChainResult(): Any?
     fun getChainStatus(): ChainCallback.Status
     fun setChainStatus(newStatus: ChainCallback.Status)
 }
 
-class DefaultReactor : Reactor {
-    override fun react(reactions: List<Reaction>) {
-        reactions.forEach { it.task.invoke(Unit) }
-    }
+interface ChainDecisionListener {
+    fun onDecisionDone(finalStatus: ChainCallback.Status)
+    fun onDecisionNext()
+}
+
+interface ChainDecision {
+    fun decision(links: List<Chain>, chain : ChainDecisionListener)
 }

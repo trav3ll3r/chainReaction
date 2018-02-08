@@ -2,7 +2,9 @@ package au.com.beba.phaserizer.feature.reactors
 
 import au.com.beba.phaserizer.feature.ConsoleLogger
 
-abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chain {
+abstract class BaseChain(
+    private val reactor: Reactor = DefaultReactor()
+) : Chain, ChainDecisionListener {
     protected open val TAG = BaseChain::class.java.simpleName
 
     private var result: Any? = null
@@ -16,37 +18,24 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
         reactions.add(Reaction(type = "LOGGER", task = {
             ConsoleLogger.log(TAG, "{%s} %s result=%s".format("REACTION", "LOGGER", result))
         }))
+    }
 
-        reactions.add(Reaction(type = "FINISH_OR_LINKS", task = {
-            val REACTION_TAG = "FINISH_OR_LINKS"
-            ConsoleLogger.log(TAG, "{%s}".format(REACTION_TAG))
+    override fun onDecisionDone(finalStatus: ChainCallback.Status) {
+        // NOTIFY PARENT chainCallback
+        chainCallback.onDone(finalStatus)
+    }
 
-            //TODO: CHECK "END" CONDITIONS
-            val unfinishedLinks = links.count { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED, ChainCallback.Status.IN_PROGRESS) }
-
-            if (unfinishedLinks == 0) {
-                ConsoleLogger.log(TAG, "{%s} %s".format(REACTION_TAG, "all chain links have a result"))
-                val finalStatus = ChainCallback.Status.SUCCESS // TODO: CALCULATE
-
-                ConsoleLogger.log(TAG, "{%s} notifying parent via chainCallback".format(REACTION_TAG))
-
-                // NOTIFY PARENT chainCallback
-                chainCallback.onDone(finalStatus)
-            } else {
-                ConsoleLogger.log(TAG, "{%s} not all Links have result yet".format(REACTION_TAG))
-
-                // RUN NEXT NOT_STARTED LINK
-                val nextLink = links.find { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
-                if (nextLink != null) {
-                    ConsoleLogger.log(TAG, "{%s} starting not started Link %s".format(REACTION_TAG, nextLink.javaClass.simpleName))
-                    nextLink.startChain(childChainCallback)
-                } else {
-                    // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
-                    ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(REACTION_TAG, unfinishedLinks))
-                }
-            }
-        }))
-
+    override fun onDecisionNext() {
+        val decisionTag = "FINISH_OR_LINKS"
+        // RUN NEXT NOT_STARTED LINK
+        val nextLink = links.find { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
+        if (nextLink != null) {
+            ConsoleLogger.log(TAG, "{%s} starting not started Link %s".format(decisionTag, nextLink.javaClass.simpleName))
+            nextLink.startChain(childChainCallback)
+        } else {
+            // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
+            ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, /*unfinishedLinks*/"???"))
+        }
     }
 
     final override fun addToChain(chain: Chain) {
@@ -58,7 +47,7 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
     }
 
     override fun getChainResult(): Any? {
-        ConsoleLogger.log(TAG, "{%s} getChainResult | taskResult=%s".format("CHAIN", result))
+        //ConsoleLogger.log(TAG, "{%s} getChainResult | taskResult=%s".format("CHAIN", result))
         return result
     }
 
@@ -68,7 +57,7 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
     }
 
     override fun getChainStatus(): ChainCallback.Status {
-        ConsoleLogger.log(TAG, "getChainStatus | status=%s".format(status))
+        //ConsoleLogger.log(TAG, "getChainStatus | status=%s".format(status))
         return this.status
     }
 
@@ -76,13 +65,6 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
         ConsoleLogger.log(TAG, "setChainStatus | status=%s => %s".format(this.status, newStatus))
         this.status = newStatus
     }
-
-//    private val reactorTaskCallback = object : ChainTask.ChainTaskCallback {
-//        override fun onResult(task: ChainTask, status: ChainCallback.Status, taskResult: Any?) {
-//            ConsoleLogger.log("{%s} reactorTaskCallback: onResult | task=%s | taskResult=%s".format("CHAIN-REACTION", task::class.java.simpleName, taskResult))
-//            setChainResult(taskResult)
-//        }
-//    }
 
     override fun startChain(callback: ChainCallback) {
         ConsoleLogger.log(TAG, "startChain")
@@ -117,6 +99,37 @@ abstract class BaseChain(private val reactor: Reactor = DefaultReactor()) : Chai
      */
     private fun runReactions() {
         ConsoleLogger.log(TAG, "runReactions")
-        reactor.react(reactions)
+        reactions()
+        decision()
+    }
+
+    override fun decision() {
+        reactor.chainDecision.decision(links, this)
+    }
+
+    override fun reactions() {
+        reactions.forEach { it.task.invoke(Unit) }
+    }
+}
+
+class BaseChainDecision : ChainDecision {
+    private val TAG = BaseChainDecision::class.java.simpleName
+    override fun decision(links: List<Chain>, chain : ChainDecisionListener) {
+        val decisionTag = "DECISION"
+        ConsoleLogger.log(TAG, "{%s}".format(decisionTag))
+
+        //TODO: CHECK "END" CONDITIONS
+        val unfinishedLinks = links.count { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED, ChainCallback.Status.IN_PROGRESS) }
+
+        if (unfinishedLinks == 0) {
+            ConsoleLogger.log(TAG, "{%s} %s".format(decisionTag, "all chain links have a result"))
+            val finalStatus = ChainCallback.Status.SUCCESS // TODO: CALCULATE
+            ConsoleLogger.log(TAG, "{%s} notifying parent via chainCallback".format(decisionTag))
+            // NOTIFY PARENT chainCallback
+            chain.onDecisionDone(finalStatus)
+        } else {
+            ConsoleLogger.log(TAG, "{%s} not all Links have result yet".format(decisionTag))
+            chain.onDecisionNext()
+        }
     }
 }
