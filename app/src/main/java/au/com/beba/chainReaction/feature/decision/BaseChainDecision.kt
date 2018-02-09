@@ -1,12 +1,16 @@
-package au.com.beba.chainReaction.feature.reactors
+package au.com.beba.chainReaction.feature.decision
 
-import au.com.beba.chainReaction.feature.ConsoleLogger
-import au.com.beba.chainReaction.feature.chain.Reactor
-
-class BaseReactor(override val chainDecision: ChainDecision = BaseChainDecision()) : Reactor
+import au.com.beba.chainReaction.feature.chain.Chain
+import au.com.beba.chainReaction.feature.chain.ChainCallback
+import au.com.beba.chainReaction.feature.chain.ChainDecision
+import au.com.beba.chainReaction.feature.chain.ChainDecisionListener
+import au.com.beba.chainReaction.feature.logger.ConsoleLogger
 
 class BaseChainDecision : ChainDecision {
+
+    @Suppress("PrivatePropertyName")
     private val TAG = BaseChainDecision::class.java.simpleName
+
     override fun decision(links: List<Chain>, chain: ChainDecisionListener) {
         val decisionTag = "DECISION"
         ConsoleLogger.log(TAG, "{%s}".format(decisionTag))

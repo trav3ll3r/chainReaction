@@ -1,6 +1,8 @@
-package au.com.beba.chainReaction.feature.reactors
+package au.com.beba.chainReaction.feature.reactor
 
-import au.com.beba.chainReaction.feature.ConsoleLogger
+import au.com.beba.chainReaction.demo.*
+import au.com.beba.chainReaction.feature.logger.ConsoleLogger
+import au.com.beba.chainReaction.feature.chain.ChainCallback
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

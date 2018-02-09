@@ -1,4 +1,4 @@
-package au.com.beba.chainReaction.feature
+package au.com.beba.chainReaction.feature.logger
 
 import java.text.SimpleDateFormat
 import java.util.*

@@ -1,8 +1,11 @@
-package au.com.beba.chainReaction.feature.reactors
+package au.com.beba.chainReaction.demo
 
-import au.com.beba.chainReaction.feature.ConsoleLogger
+import au.com.beba.chainReaction.feature.logger.ConsoleLogger
+import au.com.beba.chainReaction.feature.chain.ChainCallback
+import au.com.beba.chainReaction.feature.chain.ChainTask
+import au.com.beba.chainReaction.feature.reactor.withPhases.BaseChainWithPhases
 
-class LoggingInChain : BaseChain() {
+class LoggingInChain : BaseChainWithPhases() {
     override val TAG = LoggingInChain::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
@@ -18,7 +21,7 @@ class LoggingInChain : BaseChain() {
     }
 }
 
-class SignInChain : BaseChain() {
+class SignInChain : BaseChainWithPhases() {
     override val TAG = SignInChain::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
@@ -34,7 +37,7 @@ class SignInChain : BaseChain() {
     }
 }
 
-class GetAccountsChain : BaseChain() {
+class GetAccountsChain : BaseChainWithPhases() {
     override val TAG = GetAccountsChain::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
@@ -50,7 +53,7 @@ class GetAccountsChain : BaseChain() {
     }
 }
 
-class GetCardsChain : BaseChain() {
+class GetCardsChain : BaseChainWithPhases() {
     override val TAG = GetCardsChain::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
@@ -66,7 +69,7 @@ class GetCardsChain : BaseChain() {
     }
 }
 
-class PostSignInChain : BaseChain() {
+class PostSignInChain : BaseChainWithPhases() {
     override val TAG = PostSignInChain::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
