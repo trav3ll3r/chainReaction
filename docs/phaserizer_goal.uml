@@ -1,0 +1,14 @@
+@startuml
+	partition Phase1 {
+		:Task1;
+		:Task2;
+	}
+
+	partition Phase2 {
+		fork
+		:Task3;
+		fork again
+		:Task4;
+		endfork
+	}
+@enduml

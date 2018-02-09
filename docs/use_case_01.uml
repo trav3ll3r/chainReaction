@@ -1,0 +1,42 @@
+@startuml
+	partition SignIn {
+		:execute();
+		if ("OK") then 
+			:onSuccess();
+		else
+			:onError();
+		endif
+	}
+
+	partition EnrollFingerprint {
+		:execute();
+		if ("OK") then 
+			:onSuccess();
+			detach
+		else
+			if (skipped)
+				:onError();
+			else
+				:onSkip();
+			endif
+		endif
+	}
+
+	partition EnrollPIN {
+		:execute();
+		if ("OK") then 
+			:onSuccess();
+		else
+			:onError();
+			detach
+		endif
+	}
+
+	partition Dashboard {
+		fork
+		:LoadAccounts;
+		fork again
+		:LoadMessages;
+		endfork
+	}
+@enduml

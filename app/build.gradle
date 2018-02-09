@@ -8,12 +8,12 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
     defaultConfig {
-        applicationId "au.com.beba.phaserizer"
+        applicationId "au.com.beba.chainReaction"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -44,7 +44,7 @@ dependencies {
 
     // Kotlin AND Anko
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:${kotlin.kotlinVersion}"
-    implementation "org.jetbrains.anko:anko-sdk25:${kotlin.ankoVersion}"// sdk23 are also available
+    implementation "org.jetbrains.anko:anko-sdk25:${kotlin.ankoVersion}"// sdk23 also available
     implementation "org.jetbrains.anko:anko-support-v4:${kotlin.ankoVersion}" // support-v4 bindings
     implementation "org.jetbrains.anko:anko-appcompat-v7:${kotlin.ankoVersion}" // appcompat-v7 bindings
 

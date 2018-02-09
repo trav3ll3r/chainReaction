@@ -1,7 +1,7 @@
-package au.com.beba.phaserizer.di.module
+package au.com.beba.chainReaction.di.module
 
-import au.com.beba.phaserizer.MainActivity
-import au.com.beba.phaserizer.di.ActivityScope
+import au.com.beba.chainReaction.MainActivity
+import au.com.beba.chainReaction.di.ActivityScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 

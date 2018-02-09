@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="au.com.beba.phaserizer">
+    package="au.com.beba.chainReaction">
 
     <application
-        android:name="au.com.beba.phaserizer.App"
+        android:name="au.com.beba.chainReaction.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme">
 
         <!-- LAUNCHER ACTIVITY -->
-        <activity android:name="au.com.beba.phaserizer.MainActivity">
+        <activity android:name="au.com.beba.chainReaction.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

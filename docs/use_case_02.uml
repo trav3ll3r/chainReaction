@@ -1,0 +1,15 @@
+@startuml
+	participant ExecuteStart
+	participant onSuccess
+	participant onError
+
+	participant Reaction
+
+	ExecuteStart -> onSuccess : execute with success
+	onSuccess -> Reaction
+
+	'alt error
+	ExecuteStart -> onError : execute with error
+	onError -> Reaction
+	'end
+@enduml
