@@ -1,4 +1,6 @@
-package au.com.beba.phaserizer.feature.reactors
+package au.com.beba.chainReaction.feature.reactors
+
+import au.com.beba.chainReaction.feature.chain.Reactor
 
 class IdleReactor(override val chainDecision: ChainDecision = IdleChainDecision()) : Reactor
 

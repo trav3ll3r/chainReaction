@@ -1,6 +1,6 @@
-package au.com.beba.phaserizer
+package au.com.beba.chainReaction
 
-import au.com.beba.phaserizer.di.component.DaggerAppComponent
+import au.com.beba.chainReaction.di.component.DaggerAppComponent
 import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 

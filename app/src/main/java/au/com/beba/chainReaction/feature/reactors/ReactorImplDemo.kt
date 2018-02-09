@@ -1,6 +1,6 @@
-package au.com.beba.phaserizer.feature.reactors
+package au.com.beba.chainReaction.feature.reactors
 
-import au.com.beba.phaserizer.feature.ConsoleLogger
+import au.com.beba.chainReaction.feature.ConsoleLogger
 
 class LoggingInChain : BaseChain() {
     override val TAG = LoggingInChain::class.java.simpleName

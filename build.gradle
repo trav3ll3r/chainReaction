@@ -3,10 +3,10 @@
 buildscript {
     ext {
         libs = [
-             supportLibVersion       : "26.1.0",
+             supportLibVersion       : "27.0.2",
              firebaseLibVersion      : "11.6.0",
              constraintLayoutVersion : "1.0.2",
-             daggerVersion           : "2.11",
+             daggerVersion           : "2.14.1",
              javaxInjectVersion      : "1",
              gsonVersion             : "2.8.0",
         ]

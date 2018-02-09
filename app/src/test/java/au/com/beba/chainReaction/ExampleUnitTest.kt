@@ -1,4 +1,4 @@
-package au.com.beba.phaserizer
+package au.com.beba.chainReaction
 
 import org.junit.Test
 

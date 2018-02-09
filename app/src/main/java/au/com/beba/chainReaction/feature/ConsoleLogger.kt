@@ -1,4 +1,4 @@
-package au.com.beba.phaserizer.feature
+package au.com.beba.chainReaction.feature
 
 import java.text.SimpleDateFormat
 import java.util.*

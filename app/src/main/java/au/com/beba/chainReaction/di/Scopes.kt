@@ -1,4 +1,4 @@
-package au.com.beba.phaserizer.di
+package au.com.beba.chainReaction.di
 
 import javax.inject.Scope
 

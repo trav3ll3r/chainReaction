@@ -1,6 +1,7 @@
-package au.com.beba.phaserizer.feature.reactors
+package au.com.beba.chainReaction.feature.reactors
 
-import au.com.beba.phaserizer.feature.ConsoleLogger
+import au.com.beba.chainReaction.feature.ConsoleLogger
+import au.com.beba.chainReaction.feature.chain.Reactor
 
 abstract class BaseChain(private val reactor: Reactor = BaseReactor()) :
         AbstractChain(reactor),
