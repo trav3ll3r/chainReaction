@@ -1,13 +1,14 @@
-package au.com.beba.chainReaction.feature.reactors
+package au.com.beba.chainreaction
 
-import au.com.beba.chainReaction.feature.ConsoleLogger
+import au.com.beba.chainreaction.chain.ChainCallback
+import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SignInReactionTest {
     @Test
-    fun testBaseChain() {
+    fun testFullChainWithPhases() {
         var callbackExecuted = false
 
         val l = LoggingInChain()

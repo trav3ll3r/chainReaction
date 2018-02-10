@@ -1,15 +1,15 @@
-package au.com.beba.chainReaction.feature.reactors
+package au.com.beba.chainreaction.reactor
 
-import au.com.beba.chainReaction.feature.ConsoleLogger
-import au.com.beba.chainReaction.feature.chain.Reactor
+import au.com.beba.chainreaction.chain.*
+import au.com.beba.chainreaction.logger.ConsoleLogger
 
-abstract class BaseChain(private val reactor: Reactor = BaseReactor()) :
+abstract class BaseChainWithPhases(private val reactor: Reactor = BaseReactor()) :
         AbstractChain(reactor),
         ChainWithPhases,
         ChainDecisionListener {
 
     @Suppress("PropertyName")
-    override val TAG: String = BaseChain::class.java.simpleName
+    override val TAG: String = BaseChainWithPhases::class.java.simpleName
 
     private val links: MutableList<Chain> = mutableListOf()
     private val reactions: MutableList<Reaction> = mutableListOf()
