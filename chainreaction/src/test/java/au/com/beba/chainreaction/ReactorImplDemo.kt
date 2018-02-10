@@ -1,11 +1,11 @@
 package au.com.beba.chainreaction
 
+import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.ChainTask
 import au.com.beba.chainreaction.logger.ConsoleLogger
-import au.com.beba.chainreaction.reactor.BaseChainWithPhases
 
-class LoggingInChain : BaseChainWithPhases() {
+class LoggingInChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = LoggingInChain::class.java.simpleName
 
@@ -22,7 +22,7 @@ class LoggingInChain : BaseChainWithPhases() {
     }
 }
 
-class SignInChain : BaseChainWithPhases() {
+class SignInChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = SignInChain::class.java.simpleName
 
@@ -39,7 +39,7 @@ class SignInChain : BaseChainWithPhases() {
     }
 }
 
-class GetAccountsChain : BaseChainWithPhases() {
+class GetAccountsChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = GetAccountsChain::class.java.simpleName
 
@@ -56,7 +56,7 @@ class GetAccountsChain : BaseChainWithPhases() {
     }
 }
 
-class GetCardsChain : BaseChainWithPhases() {
+class GetCardsChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = GetCardsChain::class.java.simpleName
 
@@ -73,7 +73,7 @@ class GetCardsChain : BaseChainWithPhases() {
     }
 }
 
-class PostSignInChain : BaseChainWithPhases() {
+class PostSignInChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = PostSignInChain::class.java.simpleName
 

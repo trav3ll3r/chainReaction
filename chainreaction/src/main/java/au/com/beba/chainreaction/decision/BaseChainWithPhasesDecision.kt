@@ -6,10 +6,10 @@ import au.com.beba.chainreaction.chain.ChainDecision
 import au.com.beba.chainreaction.chain.ChainDecisionListener
 import au.com.beba.chainreaction.logger.ConsoleLogger
 
-class BaseChainDecision : ChainDecision {
+class BaseChainWithPhasesDecision : ChainDecision {
 
     @Suppress("PrivatePropertyName")
-    private val TAG = BaseChainDecision::class.java.simpleName
+    private val TAG = BaseChainWithPhasesDecision::class.java.simpleName
 
     override fun decision(links: List<Chain>, chain: ChainDecisionListener) {
         val decisionTag = "DECISION"
