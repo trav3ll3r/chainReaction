@@ -1,19 +1,24 @@
 @startuml
+    skinparam arrowThickness 4
+    skinparam arrowColor #448844
 
-    start --> [PreMainTasks]
+    (start) --> [PreMainTasks]
 	[PreMainTasks] -right-> [MainTask] : then
 	[MainTask] -right-> [PostMainTasks] : then
 	[PostMainTasks] --> [Links] : then
 
 	[Links] --> [Reactions] : then
 
-	[Reactions] -down-> [DECISION]  : then
-	[DECISION] .right.> [Links] : not-done
+	[Reactions] -down-> [Decision] : then
+	[Decision] .right.> [Links] : not-done
 
+    [Decision] *-[dotted,#888,thickness=2]right- (Reactor.decision)
+	[Decision] --> [CALL_PARENT] : done
+	[PreMainTasks] .[dotted,#f00,thickness=2].> [CALL_PARENT] : skip-entire-chain
+	[PostMainTasks] .[dotted,#f00,thickness=2].> [CALL_PARENT] : skip-links
 
-	[DECISION] ..> [CALL_PARENT] : done
-	[PreMainTasks] ..> [CALL_PARENT] : skip-main-task
-	[PostMainTasks] ..> [CALL_PARENT] : skip-links
+	[CALL_PARENT] --> (end)
 
-	[CALL_PARENT] ..> end
+	[PreMainTasks] .[dotted,#f00,thickness=2].> [Links]: skip-main-task
+	[PostMainTasks] .[dotted,#f00,thickness=2].> [Reactions] : optional
 @enduml

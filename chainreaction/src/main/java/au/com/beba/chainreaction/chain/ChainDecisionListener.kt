@@ -1,6 +1,8 @@
 package au.com.beba.chainreaction.chain
 
-import au.com.beba.chainreaction.chain.ChainCallback
+interface ChainWithDecision : Chain {
+    fun decisionPhase(): ()->Any?
+}
 
 interface ChainDecisionListener {
     fun onDecisionDone(finalStatus: ChainCallback.Status)

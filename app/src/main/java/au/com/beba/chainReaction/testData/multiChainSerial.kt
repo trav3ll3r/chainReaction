@@ -1,12 +1,11 @@
 package au.com.beba.chainReaction.testData
 
+import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.ChainTask
 import au.com.beba.chainreaction.logger.ConsoleLogger
-import au.com.beba.chainreaction.reactor.BaseChainWithPhases
 
-
-class AChain : BaseChainWithPhases() {
+class AChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = AChain::class.java.simpleName
 
@@ -23,7 +22,7 @@ class AChain : BaseChainWithPhases() {
     }
 }
 
-class BChain : BaseChainWithPhases() {
+class BChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = BChain::class.java.simpleName
 
@@ -40,7 +39,7 @@ class BChain : BaseChainWithPhases() {
     }
 }
 
-class CChain : BaseChainWithPhases() {
+class CChain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = CChain::class.java.simpleName
 
@@ -57,7 +56,7 @@ class CChain : BaseChainWithPhases() {
     }
 }
 
-class C1Chain : BaseChainWithPhases() {
+class C1Chain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = C1Chain::class.java.simpleName
 
@@ -74,7 +73,7 @@ class C1Chain : BaseChainWithPhases() {
     }
 }
 
-class C2Chain : BaseChainWithPhases() {
+class C2Chain : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = C2Chain::class.java.simpleName
 
