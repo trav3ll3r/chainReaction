@@ -35,17 +35,16 @@ abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases())
         reactions.add(reaction)
     }
 
+    override fun getChainLinks(): List<Chain> {
+        return links
+    }
+
     override fun startChain(callback: ChainCallback) {
         ConsoleLogger.log(TAG, "startChain")
         chainCallback = callback
 
         val chainExecutor: Executor = Executors.newSingleThreadExecutor()
         chainExecutor.doAsync { preMainTaskPhase() }
-
-//        val f = reactor.chainExecutor.doAsync {
-//            preMainTaskPhase()
-////            f.get()
-//        }.get()
     }
 
     override fun startChainOnSameThread(callback: ChainCallback) {
@@ -53,8 +52,6 @@ abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases())
         chainCallback = callback
 
         val chainExecutor: Executor = Executors.newSingleThreadExecutor()
-//        chainExecutor.doAsync { preMainTaskPhase() }
-
         val f = chainExecutor.doAsync { preMainTaskPhase() }
         f.get()
     }

@@ -7,26 +7,10 @@
     tools:context="au.com.beba.chainReaction.MainActivity">
 
     <Button
-        android:id="@+id/btn_test_success"
+        android:id="@+id/btn_test_non_blocking_ui"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Test Serial Chain" />
-
-    <Button
-        android:id="@+id/btn_test_error_phase1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test Error Phase 1"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/btn_test_success" />
-
-    <Button
-        android:id="@+id/btn_test_error_phase2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test Error Phase 2"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/btn_test_error_phase1" />
 
     <Button
         android:id="@+id/btn_test_error_phase3"
@@ -34,6 +18,13 @@
         android:layout_height="wrap_content"
         android:text="Click while chain is running (UI non-blocking test)"
         android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/btn_test_error_phase2" />
+        app:layout_constraintTop_toBottomOf="@id/btn_test_non_blocking_ui" />
+
+    <Button
+        android:id="@+id/btn_visualise_chain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Visualise Chain"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

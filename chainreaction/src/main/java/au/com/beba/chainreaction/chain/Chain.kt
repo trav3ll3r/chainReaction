@@ -13,6 +13,7 @@ interface Chain {
     fun getChainTask(): ChainTask
     fun linksPhase(): () -> Any?
 
+    fun getChainLinks(): List<Chain>
     fun getChainResult(): Any?
     fun getChainStatus(): ChainCallback.Status
     fun setChainStatus(newStatus: ChainCallback.Status)

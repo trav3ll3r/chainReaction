@@ -1,5 +1,6 @@
 package au.com.beba.chainReaction
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
@@ -14,9 +15,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        find<Button>(R.id.btn_test_success).setOnClickListener { testSuccess() }
-//        find<Button>(R.id.btn_test_error_phase1).setOnClickListener { testErrorPhase1() }
-//        find<Button>(R.id.btn_test_error_phase2).setOnClickListener { testErrorPhase2() }
+        find<Button>(R.id.btn_test_non_blocking_ui).setOnClickListener { testSuccess() }
+        find<Button>(R.id.btn_visualise_chain).setOnClickListener { visualiseChain() }
     }
 
     private fun testSuccess() {
@@ -39,5 +39,10 @@ class MainActivity : AppCompatActivity() {
         ConsoleLogger.log("--- START ---")
         a.startChain(chainReactionCallback)
         ConsoleLogger.log("--- END ---")
+    }
+
+    private fun visualiseChain() {
+        val intent = Intent(this, VisualiseChainActivity::class.java)
+        startActivity(intent)
     }
 }
