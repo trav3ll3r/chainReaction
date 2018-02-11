@@ -1,7 +1,7 @@
 package au.com.beba.chainreaction.chain
 
 interface Chain {
-    fun addToChain(link: Chain)
+    fun addToChain(vararg chainLinks: Chain): Chain
 
     fun startChain(callback: ChainCallback)
     fun startChainOnSameThread(callback: ChainCallback)

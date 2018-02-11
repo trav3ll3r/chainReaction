@@ -11,8 +11,7 @@ class TwoSuccessChainsTest : AbstractUnitTest() {
     private val chainB1 = B1ChainSuccess()
 
     override fun buildChain(): Chain {
-        chainA1.addToChain(chainB1)
-        return chainA1
+        return chainA1.addToChain(chainB1)
     }
 
     override fun assertChain() {

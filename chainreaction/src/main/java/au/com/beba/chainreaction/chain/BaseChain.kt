@@ -26,8 +26,9 @@ abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases())
         }))
     }
 
-    final override fun addToChain(link: Chain) {
-        links.add(link)
+    override fun addToChain(vararg chainLinks: Chain): Chain {
+        links.addAll(chainLinks)
+        return this
     }
 
     final override fun addReaction(reaction: Reaction) {

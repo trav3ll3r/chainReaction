@@ -13,9 +13,7 @@ class ThreeSuccessChainTest : AbstractUnitTest() {
     private val chainC1 = C1ChainSuccess()
 
     override fun buildChain(): Chain {
-        chainA1.addToChain(chainB1)
-        chainB1.addToChain(chainC1)
-        return chainA1
+        return chainA1.addToChain(chainB1.addToChain(chainC1))
     }
 
     override fun assertChain() {

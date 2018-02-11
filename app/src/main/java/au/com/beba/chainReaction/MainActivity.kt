@@ -23,14 +23,10 @@ class MainActivity : AppCompatActivity() {
         val a = AChain()
         val b = BChain()
         val c = CChain()
-
-        a.addToChain(b)
-        a.addToChain(c)
-
         val c1 = C1Chain()
         val c2 = C2Chain()
-        c.addToChain(c1)
-        c.addToChain(c2)
+
+        a.addToChain(b, c.addToChain(c1, c2))
 
         val chainReactionCallback = object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {

@@ -13,20 +13,7 @@ class SignInReactionTest : AbstractUnitTest() {
     private val sgc = GetCardsChain()
 
     override fun buildChain(): Chain {
-//        s.addReaction(Reaction(type = "SIGN-IN", task = {
-//            ConsoleLogger.log("SignInTAG","******** REACTION SIGN-IN ********")
-//            if (s.getChainResult() == "S") {
-//                s.setChainStatus(ChainCallback.Status.SUCCESS)
-//            }
-//        }))
-
-        l.addToChain(s)
-        l.addToChain(ps)
-
-        ps.addToChain(sga)
-        ps.addToChain(sgc)
-
-        return l
+        return l.addToChain(s, ps.addToChain(sga, sgc))
     }
 
     override fun assertChain() {
