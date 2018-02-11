@@ -1,4 +1,4 @@
-package au.com.beba.chainreaction
+package au.com.beba.chainreaction.testData
 
 import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback

@@ -3,6 +3,8 @@ package au.com.beba.chainreaction.chain
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import au.com.beba.chainreaction.reactor.BaseReactorWithPhases
 import org.jetbrains.anko.doAsync
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases()) :
         AbstractChain(reactor),
@@ -36,7 +38,23 @@ abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases())
         ConsoleLogger.log(TAG, "startChain")
         chainCallback = callback
 
-        val f = reactor.chainExecutor.doAsync { preMainTaskPhase() }
+        val chainExecutor: Executor = Executors.newSingleThreadExecutor()
+        chainExecutor.doAsync { preMainTaskPhase() }
+
+//        val f = reactor.chainExecutor.doAsync {
+//            preMainTaskPhase()
+////            f.get()
+//        }.get()
+    }
+
+    override fun startChainOnSameThread(callback: ChainCallback) {
+        ConsoleLogger.log(TAG, "startChainOnSameThread")
+        chainCallback = callback
+
+        val chainExecutor: Executor = Executors.newSingleThreadExecutor()
+//        chainExecutor.doAsync { preMainTaskPhase() }
+
+        val f = chainExecutor.doAsync { preMainTaskPhase() }
         f.get()
     }
 

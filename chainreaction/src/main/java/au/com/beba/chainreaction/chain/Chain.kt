@@ -4,6 +4,7 @@ interface Chain {
     fun addToChain(link: Chain)
 
     fun startChain(callback: ChainCallback)
+    fun startChainOnSameThread(callback: ChainCallback)
 
     // PHASES
     fun preMainTaskPhase(): () -> Any?
