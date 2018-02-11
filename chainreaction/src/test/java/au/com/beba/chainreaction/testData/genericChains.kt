@@ -55,3 +55,20 @@ class B1ChainSuccess : BaseChain() {
         }
     }
 }
+
+class C1ChainSuccess : BaseChain() {
+    @Suppress("PropertyName")
+    override val TAG: String = C1ChainSuccess::class.java.simpleName
+
+    override fun getChainTask(): ChainTask {
+        return object : ChainTask {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
+                val status = ChainCallback.Status.SUCCESS
+                val taskResult = "C1"
+                ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
+                Thread.sleep(500)
+                callback.onResult(this, status, taskResult)
+            }
+        }
+    }
+}

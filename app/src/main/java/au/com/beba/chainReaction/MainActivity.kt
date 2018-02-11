@@ -6,10 +6,7 @@ import android.widget.Button
 import au.com.beba.chainReaction.testData.*
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.logger.ConsoleLogger
-import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,14 +23,10 @@ class MainActivity : AppCompatActivity() {
         val a = AChain()
         val b = BChain()
         val c = CChain()
-
-        a.addToChain(b)
-        a.addToChain(c)
-
         val c1 = C1Chain()
         val c2 = C2Chain()
-        c.addToChain(c1)
-        c.addToChain(c2)
+
+        a.addToChain(b, c.addToChain(c1, c2))
 
         val chainReactionCallback = object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
@@ -44,8 +37,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         ConsoleLogger.log("--- START ---")
-        val chainExecutor: Executor = Executors.newSingleThreadExecutor()
-        chainExecutor.doAsync { a.startChain(chainReactionCallback) }
+        a.startChain(chainReactionCallback)
         ConsoleLogger.log("--- END ---")
     }
 }
