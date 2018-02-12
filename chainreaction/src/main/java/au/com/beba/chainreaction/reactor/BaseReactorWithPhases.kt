@@ -6,7 +6,7 @@ import au.com.beba.chainreaction.decision.BaseChainWithPhasesDecision
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class BaseReactorWithPhases(
+open class BaseReactorWithPhases(
         override val chainDecision: ChainDecision = BaseChainWithPhasesDecision(),
         override val chainExecutor: Executor = Executors.newSingleThreadExecutor()
 )

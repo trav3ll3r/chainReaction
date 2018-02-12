@@ -6,7 +6,9 @@ import org.jetbrains.anko.doAsync
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases()) :
+abstract class BaseChain(
+        @Suppress("MemberVisibilityCanBePrivate") protected val reactor: Reactor = BaseReactorWithPhases()
+) :
         AbstractChain(reactor),
         ChainWithDecision,
         ChainDecisionListener,
@@ -56,12 +58,23 @@ abstract class BaseChain(private val reactor: Reactor = BaseReactorWithPhases())
         f.get()
     }
 
-    override fun preMainTaskPhase(): () -> Any? {
+    /**
+     * Wraps [preMainTask] and then calls [mainTaskPhase]
+     */
+    private fun preMainTaskPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "preMainTaskPhase")
+        preMainTask()
         return mainTaskPhase()
     }
 
-    override fun mainTaskPhase(): () -> Any? {
+    override fun preMainTask() {
+        ConsoleLogger.log(TAG, "preMainTask")
+    }
+
+    /**
+     * Wraps [getChainTask], updates IN_PROGRESS status and then calls [postMainTaskPhase]
+     */
+    private fun mainTaskPhase(): () -> Any? {
         // RUN ChainTask (MAIN TASK)
         ConsoleLogger.log(TAG, "mainTaskPhase | run MainTask")
         setChainStatus(ChainCallback.Status.IN_PROGRESS)

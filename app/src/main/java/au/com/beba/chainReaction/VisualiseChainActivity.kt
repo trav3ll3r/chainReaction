@@ -1,6 +1,11 @@
 package au.com.beba.chainReaction
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import au.com.beba.chainReaction.feature.ChainView
@@ -11,18 +16,31 @@ import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import au.com.beba.chainreaction.chain.ChainCallback
-import org.jetbrains.anko.margin
-import org.jetbrains.anko.padding
 import java.util.concurrent.atomic.AtomicInteger
 
+const val CHAIN_REACTION_EVENT : String = "au.com.beba.chainReaction.CHAIN_REACTION_EVENT"
+const val CHAIN_CLASS : String = "au.com.beba.chainReaction.CHAIN_CLASS"
 
 class VisualiseChainActivity : AppCompatActivity() {
 
     private val tag: String = VisualiseChainActivity::class.java.simpleName
 
     private lateinit var canvas: RelativeLayout
-
     private lateinit var rootAnchorView: View
+    private lateinit var topChain: Chain
+
+    private val localBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+//            Log.v(tag, "Received broadcast intent [%s]".format(intent))
+            val bundle = intent?.extras
+            if (bundle != null) {
+                val chainTag = bundle[CHAIN_CLASS] as String
+                val chain = getChainByTag(chainTag)
+                Log.v(tag, "Received broadcast chainTag [%s] for chain [%s]".format(chainTag, chain))
+                updateChainView(chain)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,19 +53,26 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun visualise() {
-        val chain = buildChain()
-        drawChain(chain, null, rootAnchorView)
+        topChain = buildChain()
+        drawChain(topChain, null, rootAnchorView)
     }
 
     private fun executeChain() {
-        val chain = buildChain()
-        chain.setChainStatus(ChainCallback.Status.IN_PROGRESS)
-        updateChainView(chain)
-//        chain.startChain(object : ChainCallback {
-//            override fun onDone(status: ChainCallback.Status) {
-//                //TODO
-//            }
-//        })
+        registerListener()
+
+        topChain.startChain(object : ChainCallback {
+            override fun onDone(status: ChainCallback.Status) {
+                unregisterListener()
+            }
+        })
+    }
+
+    private fun registerListener() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(localBroadcastReceiver, IntentFilter(CHAIN_REACTION_EVENT))
+    }
+
+    private fun unregisterListener() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(localBroadcastReceiver)
     }
 
     private var bottomMost: View? = null
@@ -71,7 +96,7 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         var parentView: ChainView? = null
         if (parent != null) {
-            parentView = getChainViewByTag(getViewTag(parent))
+            parentView = getChainViewByTag(buildChainTag(parent))
         }
 
         v.layoutParams = RelativeLayout.LayoutParams(abcChain.getSleepTime().toInt(), RelativeLayout.LayoutParams.WRAP_CONTENT)
@@ -81,20 +106,21 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         place(layoutParams, parentView, anchor)
         v.layoutParams = layoutParams
-        v.tag = getViewTag(chain)
+        v.tag = buildChainTag(chain)
 
         canvas.addView(v)
 
         return v
     }
 
-    private fun updateChainView(chain: Chain) {
-        val chainView = getChainViewByTag(getViewTag(chain))
-        chainView?.update(chain as AbcChain)
+    private fun updateChainView(chain: Chain?) {
+        if (chain != null) {
+            val chainView = getChainViewByTag(buildChainTag(chain))
+            chainView?.update(chain as AbcChain)
+        }
     }
 
     private fun place(lp: RelativeLayout.LayoutParams, parentView: View?, anchorView: View) {
-        Log.v(tag, "ParentView[%s]".format(parentView ?: "X"))
         if (parentView == null) {
             // PLACE AGAINST anchor
             lp.addRule(RelativeLayout.RIGHT_OF, anchorView.id)
@@ -110,17 +136,42 @@ class VisualiseChainActivity : AppCompatActivity() {
         return canvas.findViewWithTag(viewTag)
     }
 
-    private fun getViewTag(chain: Chain): String {
+    private fun getChainByTag(viewTag: String): Chain? {
+        return findInChain(viewTag, topChain)
+    }
+
+    private fun findInChain(needle: String, chain: Chain): Chain? {
+        var result: Chain? = null
+
+        val haystackTag = buildChainTag(chain)
+        if (haystackTag == needle) {
+            result = chain
+        } else {
+            val children = chain.getChainLinks().size
+            if (children > 0) {
+                (0 until children).forEach {
+                    val interim = findInChain(needle, chain.getChainLinks()[it])
+                    if (interim != null) {
+                        result = interim
+                        return@forEach
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    private fun buildChainTag(chain: Chain): String {
         return chain::class.java.simpleName
     }
 
     private fun buildChain(): Chain {
-        return AChain().addToChain(
-                BChain(),
-                CChain().addToChain(C1Chain(), C2Chain()),
-                DChain(),
-                EChain().addToChain(E1Chain()),
-                FChain())
+        return AChain(this).addToChain(
+                BChain(this),
+                CChain(this).addToChain(C1Chain(this), C2Chain(this)),
+                DChain(this),
+                EChain(this).addToChain(E1Chain(this)),
+                FChain(this))
     }
 
     private val nextGeneratedId = AtomicInteger(1)

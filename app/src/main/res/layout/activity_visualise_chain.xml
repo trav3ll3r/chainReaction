@@ -9,16 +9,20 @@
 
     <Button
         android:id="@+id/btn_show_test"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Show Chain" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/btn_start_test"
+        android:text="@string/btn_show" />
 
     <Button
         android:id="@+id/btn_start_test"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/btn_show_test"
-        android:text="Start Chain"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_show_test"
+        android:text="@string/btn_start"
         android:visibility="visible"
         />
 

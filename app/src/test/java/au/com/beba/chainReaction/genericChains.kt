@@ -1,4 +1,4 @@
-package au.com.beba.chainreaction.testData
+package au.com.beba.chainReaction
 
 import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback
@@ -107,6 +107,23 @@ class C12ChainSuccess : BaseChain() {
     }
 }
 
+class C121ChainSuccess : BaseChain() {
+    @Suppress("PropertyName")
+    override val TAG: String = C121ChainSuccess::class.java.simpleName
+
+    override fun getChainTask(): ChainTask {
+        return object : ChainTask {
+            override fun run(callback: ChainTask.ChainTaskCallback) {
+                val status = ChainCallback.Status.SUCCESS
+                val taskResult = "C121"
+                ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
+                Thread.sleep(500)
+                callback.onResult(this, status, taskResult)
+            }
+        }
+    }
+}
+
 class D1ChainSuccess : BaseChain() {
     @Suppress("PropertyName")
     override val TAG: String = D1ChainSuccess::class.java.simpleName
@@ -141,15 +158,15 @@ class E1ChainSuccess : BaseChain() {
     }
 }
 
-class E2ChainSuccess : BaseChain() {
+class E11ChainSuccess : BaseChain() {
     @Suppress("PropertyName")
-    override val TAG: String = E2ChainSuccess::class.java.simpleName
+    override val TAG: String = E11ChainSuccess::class.java.simpleName
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
             override fun run(callback: ChainTask.ChainTaskCallback) {
                 val status = ChainCallback.Status.SUCCESS
-                val taskResult = "E2"
+                val taskResult = "E11"
                 ConsoleLogger.log(TAG, "Running task with status=[%s] and result=[%s]".format(status, taskResult))
                 Thread.sleep(500)
                 callback.onResult(this, status, taskResult)

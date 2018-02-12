@@ -20,11 +20,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testSuccess() {
-        val a = AChain()
-        val b = BChain()
-        val c = CChain()
-        val c1 = C1Chain()
-        val c2 = C2Chain()
+        val a = AChain(this)
+        val b = BChain(this)
+        val c = CChain(this)
+        val c1 = C1Chain(this)
+        val c2 = C2Chain(this)
 
         a.addToChain(b, c.addToChain(c1, c2))
 

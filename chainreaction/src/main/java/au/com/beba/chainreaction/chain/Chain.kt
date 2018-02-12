@@ -7,10 +7,9 @@ interface Chain {
     fun startChainOnSameThread(callback: ChainCallback)
 
     // PHASES
-    fun preMainTaskPhase(): () -> Any?
-    fun mainTaskPhase(): () -> Any?
-    fun postMainTaskPhase(): () -> Any?
+    fun preMainTask()
     fun getChainTask(): ChainTask
+    fun postMainTaskPhase(): () -> Any?
     fun linksPhase(): () -> Any?
 
     fun getChainLinks(): List<Chain>

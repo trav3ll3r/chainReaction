@@ -1,13 +1,24 @@
 package au.com.beba.chainReaction.testData
 
+import android.content.Context
+import android.content.Intent
+import au.com.beba.chainReaction.CHAIN_CLASS
+import au.com.beba.chainReaction.CHAIN_REACTION_EVENT
+import au.com.beba.chainReaction.ReactorWithBroadcastIml
 import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.ChainTask
 import au.com.beba.chainreaction.logger.ConsoleLogger
 
-abstract class AbcChain : BaseChain() {
+abstract class AbcChain(context: Context)
+    : BaseChain(reactor = ReactorWithBroadcastIml(context)) {
     protected open val status = ChainCallback.Status.SUCCESS
     protected open val taskResult = "?"
+
+    override fun preMainTask() {
+        super.preMainTask()
+        (reactor as ReactorWithBroadcastIml).localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, this::class.java.simpleName))
+    }
 
     override fun getChainTask(): ChainTask {
         return object : ChainTask {
@@ -26,55 +37,55 @@ abstract class AbcChain : BaseChain() {
     }
 }
 
-class AChain : AbcChain() {
+class AChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = AChain::class.java.simpleName
     override val taskResult = "A"
 }
 
-class BChain : AbcChain() {
+class BChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = BChain::class.java.simpleName
     override val taskResult = "B"
 }
 
-class CChain : AbcChain() {
+class CChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = CChain::class.java.simpleName
     override val taskResult = "C"
 }
 
-class C1Chain : AbcChain() {
+class C1Chain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = C1Chain::class.java.simpleName
     override val taskResult = "C1"
 }
 
-class C2Chain : AbcChain() {
+class C2Chain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = C2Chain::class.java.simpleName
     override val taskResult = "C2"
 }
 
-class DChain : AbcChain() {
+class DChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = DChain::class.java.simpleName
     override val taskResult = "D"
 }
 
-class EChain : AbcChain() {
+class EChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = EChain::class.java.simpleName
     override val taskResult = "E"
 }
 
-class E1Chain : AbcChain() {
+class E1Chain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = E1Chain::class.java.simpleName
     override val taskResult = "E1"
 }
 
-class FChain : AbcChain() {
+class FChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = FChain::class.java.simpleName
     override val taskResult = "F1"
