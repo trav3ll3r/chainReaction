@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/btn_show_test"
         android:text="Start Chain"
-        android:visibility="gone"
+        android:visibility="visible"
         />
 
     <RelativeLayout

@@ -41,11 +41,13 @@ class VisualiseChainActivity : AppCompatActivity() {
 
     private fun executeChain() {
         val chain = buildChain()
-        chain.startChain(object : ChainCallback {
-            override fun onDone(status: ChainCallback.Status) {
-                //TODO
-            }
-        })
+        chain.setChainStatus(ChainCallback.Status.IN_PROGRESS)
+        updateChainView(chain)
+//        chain.startChain(object : ChainCallback {
+//            override fun onDone(status: ChainCallback.Status) {
+//                //TODO
+//            }
+//        })
     }
 
     private var bottomMost: View? = null
@@ -62,18 +64,17 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun placeChainView(chain: Chain, parent: Chain?, anchor: View): View {
+        val abcChain = chain as AbcChain
         val v = ChainView(this)
         v.id = generateViewId()
-        v.chainDuration = chain::class.java.simpleName
-        v.exampleDimension = resources.getDimension(R.dimen.duration_size)
-        v.chainBackground = android.R.color.holo_blue_dark
+        v.update(abcChain)
 
         var parentView: ChainView? = null
         if (parent != null) {
             parentView = getChainViewByTag(getViewTag(parent))
         }
 
-        v.layoutParams = RelativeLayout.LayoutParams(200, 100)
+        v.layoutParams = RelativeLayout.LayoutParams(abcChain.getSleepTime().toInt(), RelativeLayout.LayoutParams.WRAP_CONTENT)
         val layoutParams = v.layoutParams as RelativeLayout.LayoutParams
         layoutParams.leftMargin = 2
         layoutParams.topMargin = 2
@@ -85,6 +86,11 @@ class VisualiseChainActivity : AppCompatActivity() {
         canvas.addView(v)
 
         return v
+    }
+
+    private fun updateChainView(chain: Chain) {
+        val chainView = getChainViewByTag(getViewTag(chain))
+        chainView?.update(chain as AbcChain)
     }
 
     private fun place(lp: RelativeLayout.LayoutParams, parentView: View?, anchorView: View) {
@@ -109,14 +115,12 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun buildChain(): Chain {
-        val a = AChain()
-        val b = BChain()
-        val c = CChain()
-        val c1 = C1Chain()
-        val c2 = C2Chain()
-
-        return a.addToChain(b, c.addToChain(c1, c2))
-//        return a.addToChain(b, c, c1, c2)
+        return AChain().addToChain(
+                BChain(),
+                CChain().addToChain(C1Chain(), C2Chain()),
+                DChain(),
+                EChain().addToChain(E1Chain()),
+                FChain())
     }
 
     private val nextGeneratedId = AtomicInteger(1)
