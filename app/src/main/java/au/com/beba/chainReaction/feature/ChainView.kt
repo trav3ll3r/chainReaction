@@ -3,6 +3,7 @@ package au.com.beba.chainReaction.feature
 import android.content.Context
 import android.support.constraint.ConstraintLayout
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.TextView
 import au.com.beba.chainReaction.R
 import au.com.beba.chainReaction.testData.AbcChain
@@ -11,6 +12,8 @@ import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.find
 
 class ChainView : ConstraintLayout {
+
+    private val tag = ChainView::class.java.simpleName
 
     private lateinit var chainDuration: TextView
     private lateinit var chainName: TextView
@@ -35,6 +38,7 @@ class ChainView : ConstraintLayout {
     }
 
     fun update(chain: AbcChain) {
+        Log.d(tag, "Update for [%s] with status [%s]".format(chain::class.java.simpleName, chain.getChainStatus()))
         this.chainName.text = chain::class.java.simpleName
         this.chainDuration.text = chain.getSleepTime().toString()
         backgroundColor = resources.getColor(
