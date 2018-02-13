@@ -82,7 +82,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
             override fun onResult(task: ChainTask, newMainTaskStatus: ChainCallback.Status, taskResult: Any?) {
                 ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | taskResult=%s".format(taskResult))
                 setChainResult(taskResult)
-                mainTaskStatus = newMainTaskStatus
+                chainMainTaskStatus = newMainTaskStatus
                 ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | end")
             }
         })
@@ -108,7 +108,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /* ************** */
     override fun decisionPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "decisionPhase")
-        reactor.chainDecision.decision(links, mainTaskStatus, this)
+        reactor.chainDecision.decision(links, chainMainTaskStatus, this)
         return {}
     }
 

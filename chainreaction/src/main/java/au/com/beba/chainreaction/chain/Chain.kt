@@ -15,6 +15,7 @@ interface Chain {
 
     fun getChainLinks(): List<Chain>
     fun getChainResult(): Any?
+    fun getMainTaskStatus(): ChainCallback.Status
     fun getChainStatus(): ChainCallback.Status
     fun setChainStatus(newStatus: ChainCallback.Status)
 }
