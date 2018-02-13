@@ -63,6 +63,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
      */
     private fun preMainTaskPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "preMainTaskPhase")
+        setChainStatus(ChainCallback.Status.IN_PROGRESS)
         preMainTask()
         return mainTaskPhase()
     }
@@ -72,12 +73,11 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     }
 
     /**
-     * Wraps [getChainTask], updates IN_PROGRESS status and then calls [postMainTaskPhase]
+     * Calls [getChainTask] and calls [postMainTaskPhase]
      */
     private fun mainTaskPhase(): () -> Any? {
         // RUN ChainTask (MAIN TASK)
         ConsoleLogger.log(TAG, "mainTaskPhase | run MainTask")
-        setChainStatus(ChainCallback.Status.IN_PROGRESS)
         getChainTask().run(object : ChainTask.ChainTaskCallback {
             override fun onResult(task: ChainTask, newStatus: ChainCallback.Status, taskResult: Any?) {
                 ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | taskResult=%s".format(taskResult))
@@ -90,9 +90,17 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         return postMainTaskPhase()
     }
 
-    override fun postMainTaskPhase(): () -> Any? {
+    /* ******************** */
+    /* POST-MAIN TASK PHASE */
+    /* ******************** */
+    private fun postMainTaskPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "postMainTaskPhase")
+        postMainTask()
         return decisionPhase()
+    }
+
+    override fun postMainTask() {
+        ConsoleLogger.log(TAG, "postMainTask")
     }
 
     /* ************** */

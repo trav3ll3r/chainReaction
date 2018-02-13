@@ -10,7 +10,7 @@ interface Chain {
     // PHASES
     fun preMainTask()
     fun getChainTask(): ChainTask
-    fun postMainTaskPhase(): () -> Any?
+    fun postMainTask()
     fun linksPhase(): () -> Any?
 
     fun getChainLinks(): List<Chain>
