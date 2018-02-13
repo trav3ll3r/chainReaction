@@ -39,6 +39,11 @@ abstract class AbcChain(context: Context)
         reactions.forEach { it.task.invoke(this) }
     }
 
+    override fun chainFinished() {
+        super.chainFinished()
+        broadcastChainChanged()
+    }
+
     fun getSleepTime(): Long {
         val defaultSleep: Long = 200
         val sleepMultiplier: Long = 2

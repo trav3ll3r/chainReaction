@@ -87,7 +87,9 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         topChain.startChain(object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
-                unregisterListener()
+                //TODO: FIND A BETTER PLACE TO UNREGISTER
+                //TODO: HAPPENS TO SOON AND LAST EVENTS DON'T GET PROCESSED
+                //unregisterListener()
             }
         })
     }
