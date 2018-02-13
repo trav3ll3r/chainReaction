@@ -9,8 +9,10 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RelativeLayout
+import android.widget.TextView
 import au.com.beba.chainReaction.feature.ChainView
 import au.com.beba.chainReaction.testData.*
 import au.com.beba.chainreaction.chain.Chain
@@ -30,6 +32,13 @@ class VisualiseChainActivity : AppCompatActivity() {
     private lateinit var canvas: RelativeLayout
     private lateinit var rootAnchorView: View
     private lateinit var topChain: Chain
+
+    // INSPECT
+    private lateinit var inspectHolder: ViewGroup
+    private lateinit var inspectName: TextView
+    private lateinit var inspectMainStatus: TextView
+    private lateinit var inspectChainStatus: TextView
+
 
     private val localBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -60,6 +69,11 @@ class VisualiseChainActivity : AppCompatActivity() {
         find<Button>(R.id.btn_start_test).setOnClickListener { executeChain() }
         canvas = find(R.id.chain_canvas)
         rootAnchorView = find(R.id.anchor_view)
+
+        inspectHolder = find(R.id.inspect_holder)
+        inspectName = find(R.id.inspect_chain_name)
+        inspectMainStatus = find(R.id.inspect_chain_main_task_status)
+        inspectChainStatus = find(R.id.inspect_chain_status)
     }
 
     private fun visualise() {
@@ -126,6 +140,8 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         canvas.addView(v)
 
+        v.setOnClickListener { showChainInspection(v.tag as String) }
+
         return v
     }
 
@@ -159,6 +175,18 @@ class VisualiseChainActivity : AppCompatActivity() {
                 DChain(this),
                 EChain(this).addToChain(E1Chain(this)),
                 FChain(this))
+    }
+
+    private fun showChainInspection(chainTag: String) {
+        val chain = getChainByTag(chainTag, topChain)
+        if (chain != null) {
+            inspectHolder.visibility = View.VISIBLE
+            inspectName.text = chain::class.java.simpleName
+            inspectMainStatus.text = chain.getMainTaskStatus().name
+            inspectChainStatus.text = chain.getChainStatus().name
+        } else {
+            inspectHolder.visibility = View.GONE
+        }
     }
 
     private val nextGeneratedId = AtomicInteger(1)
