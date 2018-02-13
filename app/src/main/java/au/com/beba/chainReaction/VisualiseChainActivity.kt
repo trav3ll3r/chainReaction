@@ -12,16 +12,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.RelativeLayout
 import au.com.beba.chainReaction.feature.ChainView
-import au.com.beba.chainReaction.testData.AChain
-import au.com.beba.chainReaction.testData.AbcChain
-import au.com.beba.chainReaction.testData.BChain
-import au.com.beba.chainReaction.testData.C1Chain
-import au.com.beba.chainReaction.testData.C2Chain
-import au.com.beba.chainReaction.testData.CChain
-import au.com.beba.chainReaction.testData.DChain
-import au.com.beba.chainReaction.testData.E1Chain
-import au.com.beba.chainReaction.testData.EChain
-import au.com.beba.chainReaction.testData.FChain
+import au.com.beba.chainReaction.testData.*
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.Reaction
@@ -45,7 +36,7 @@ class VisualiseChainActivity : AppCompatActivity() {
             val bundle = intent?.extras
             if (bundle != null) {
                 val chainTag = bundle[CHAIN_CLASS] as String
-                val chain = getChainByTag(chainTag)
+                val chain = getChainByTag(chainTag, topChain)
                 Log.v(tag, "Received broadcast chainTag [%s] for chain [%s]".format(chainTag, chain))
                 updateChainView(chain)
             }
@@ -120,10 +111,11 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         var parentView: ChainView? = null
         if (parent != null) {
-            parentView = getChainViewByTag(buildChainTag(parent))
+            parentView = getChainViewByTag(canvas, buildChainTag(parent))
         }
 
-        v.layoutParams = RelativeLayout.LayoutParams(abcChain.getSleepTime().toInt(), RelativeLayout.LayoutParams.WRAP_CONTENT)
+//        v.layoutParams = RelativeLayout.LayoutParams(abcChain.getSleepTime().toInt(), RelativeLayout.LayoutParams.WRAP_CONTENT)
+        v.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
         val layoutParams = v.layoutParams as RelativeLayout.LayoutParams
         layoutParams.leftMargin = 2
         layoutParams.topMargin = 2
@@ -139,7 +131,7 @@ class VisualiseChainActivity : AppCompatActivity() {
 
     private fun updateChainView(chain: Chain?) {
         if (chain != null) {
-            val chainView = getChainViewByTag(buildChainTag(chain))
+            val chainView = getChainViewByTag(canvas, buildChainTag(chain))
             chainView?.update(chain as AbcChain)
         }
     }
@@ -154,39 +146,6 @@ class VisualiseChainActivity : AppCompatActivity() {
         }
 
         lp.addRule(RelativeLayout.BELOW, bottomMost!!.id)
-    }
-
-    private fun getChainViewByTag(viewTag: String): ChainView? {
-        return canvas.findViewWithTag(viewTag)
-    }
-
-    private fun getChainByTag(viewTag: String): Chain? {
-        return findInChain(viewTag, topChain)
-    }
-
-    private fun findInChain(needle: String, chain: Chain): Chain? {
-        var result: Chain? = null
-
-        val haystackTag = buildChainTag(chain)
-        if (haystackTag == needle) {
-            result = chain
-        } else {
-            val children = chain.getChainLinks().size
-            if (children > 0) {
-                (0 until children).forEach {
-                    val interim = findInChain(needle, chain.getChainLinks()[it])
-                    if (interim != null) {
-                        result = interim
-                        return@forEach
-                    }
-                }
-            }
-        }
-        return result
-    }
-
-    private fun buildChainTag(chain: Chain): String {
-        return chain::class.java.simpleName
     }
 
     private fun buildChain(): Chain {
