@@ -59,7 +59,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     }
 
     /**
-     * Wraps [preMainTask] and then calls [mainTaskPhase]
+     * Calls [preMainTask] and then [mainTaskPhase]
      */
     private fun preMainTaskPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "preMainTaskPhase")
@@ -73,16 +73,16 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     }
 
     /**
-     * Calls [getChainTask] and calls [postMainTaskPhase]
+     * Calls [getChainTask] and then [postMainTaskPhase]
      */
     private fun mainTaskPhase(): () -> Any? {
         // RUN ChainTask (MAIN TASK)
         ConsoleLogger.log(TAG, "mainTaskPhase | run MainTask")
         getChainTask().run(object : ChainTask.ChainTaskCallback {
-            override fun onResult(task: ChainTask, newStatus: ChainCallback.Status, taskResult: Any?) {
+            override fun onResult(task: ChainTask, newMainTaskStatus: ChainCallback.Status, taskResult: Any?) {
                 ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | taskResult=%s".format(taskResult))
                 setChainResult(taskResult)
-                setChainStatus(newStatus)
+                mainTaskStatus = newMainTaskStatus
                 ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | end")
             }
         })
@@ -108,13 +108,16 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /* ************** */
     override fun decisionPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "decisionPhase")
-        reactor.chainDecision.decision(links, this)
+        reactor.chainDecision.decision(links, mainTaskStatus, this)
         return {}
     }
 
     override fun onDecisionDone(finalStatus: ChainCallback.Status) {
         val decisionTag = "DECISION_DONE"
         ConsoleLogger.log(TAG, "{%s} all links have result".format(decisionTag))
+
+        ConsoleLogger.log(TAG, "{%s} setting status [%s]".format(decisionTag, finalStatus))
+        setChainStatus(finalStatus)
         // NOTIFY PARENT chainCallback
         chainCallback.onDone(finalStatus)
     }

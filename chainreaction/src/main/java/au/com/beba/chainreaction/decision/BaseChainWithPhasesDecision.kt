@@ -11,7 +11,7 @@ class BaseChainWithPhasesDecision : ChainDecision {
     @Suppress("PrivatePropertyName")
     private val TAG = BaseChainWithPhasesDecision::class.java.simpleName
 
-    override fun decision(links: List<Chain>, chain: ChainDecisionListener) {
+    override fun decision(links: List<Chain>, mainTaskStatus: ChainCallback.Status, decisionListener: ChainDecisionListener) {
         val decisionTag = "DECISION"
         ConsoleLogger.log(TAG, "{%s}".format(decisionTag))
 
@@ -20,13 +20,25 @@ class BaseChainWithPhasesDecision : ChainDecision {
 
         if (unfinishedLinks == 0) {
             ConsoleLogger.log(TAG, "{%s} %s".format(decisionTag, "all chain links have a result"))
-            val finalStatus = ChainCallback.Status.SUCCESS // TODO: CALCULATE
+            // CALCULATE END STATUS
+            // TODO: INJECT STRATEGY?
+
+            var finalStatus = mainTaskStatus
+
+            if (finalStatus == ChainCallback.Status.SUCCESS) {
+                val linksWithErrors = links.count { it.getChainStatus() == ChainCallback.Status.ERROR }
+                finalStatus = when (linksWithErrors) {
+                    0 -> ChainCallback.Status.SUCCESS
+                    else -> ChainCallback.Status.ERROR
+                }
+            }
             ConsoleLogger.log(TAG, "{%s} notifying parent via chainCallback".format(decisionTag))
-            // NOTIFY PARENT chainCallback
-            chain.onDecisionDone(finalStatus)
+
+            // NOTIFY decisionListener
+            decisionListener.onDecisionDone(finalStatus)
         } else {
             ConsoleLogger.log(TAG, "{%s} not all Links have result yet".format(decisionTag))
-            chain.onDecisionNotDone()
+            decisionListener.onDecisionNotDone()
         }
     }
 }

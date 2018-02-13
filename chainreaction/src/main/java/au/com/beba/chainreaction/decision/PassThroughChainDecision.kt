@@ -6,7 +6,7 @@ import au.com.beba.chainreaction.chain.ChainDecision
 import au.com.beba.chainreaction.chain.ChainDecisionListener
 
 class PassThroughChainDecision : ChainDecision {
-    override fun decision(links: List<Chain>, chain: ChainDecisionListener) {
-        chain.onDecisionDone(ChainCallback.Status.SUCCESS)
+    override fun decision(links: List<Chain>, mainTaskStatus: ChainCallback.Status, decisionListener: ChainDecisionListener) {
+        decisionListener.onDecisionDone(ChainCallback.Status.SUCCESS)
     }
 }

@@ -9,16 +9,18 @@
 
 	[Links] --> [Reactions] : then
 
-	[Reactions] -down-> [Decision] : then
+	[Reactions] -down-> [Decision] : Success\nor Error
 	[Decision] .right.> [Links] : not-done
 
     [Decision] *-[dotted,#888,thickness=2]right- (Reactor.decision)
-	[Decision] --> [CALL_PARENT] : done
-	[PreMainTasks] .[dotted,#f00,thickness=2].> [CALL_PARENT] : skip-entire-chain
-	[PostMainTasks] .[dotted,#f00,thickness=2].> [CALL_PARENT] : skip-links
+	[Decision] --> [parent.onDone] : +finalStatus
+	[PreMainTasks] .[dotted,#f00,thickness=2].> [parent.onDone] : skip-entire-chain\nSuccess\nor Error
+	[PostMainTasks] .[dotted,#f00,thickness=2].> [parent.onDone] : skip-entire-chain\nSuccess\nor Error
 
-	[CALL_PARENT] --> (end)
+	[parent.onDone] --> (end)
+
+    (end) .[dashed,#00f,thickness=3].> [Reactions] : parent-chain
 
 	[PreMainTasks] .[dotted,#f00,thickness=2].> [Links]: skip-main-task
-	[PostMainTasks] .[dotted,#f00,thickness=2].> [Reactions] : optional
+	[PostMainTasks] .[dotted,#f00,thickness=2].> [Reactions] : onError\nskip-links
 @enduml
