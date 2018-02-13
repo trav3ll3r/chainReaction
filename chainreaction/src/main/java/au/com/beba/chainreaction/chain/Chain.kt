@@ -12,6 +12,7 @@ interface Chain {
     fun getChainTask(): ChainTask
     fun postMainTask()
     fun linksPhase(): () -> Any?
+    fun chainFinished()
 
     fun getChainLinks(): List<Chain>
     fun getChainResult(): Any?

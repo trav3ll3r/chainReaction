@@ -118,6 +118,9 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 
         ConsoleLogger.log(TAG, "{%s} setting status [%s]".format(decisionTag, finalStatus))
         setChainStatus(finalStatus)
+
+        chainFinished()
+
         // NOTIFY PARENT chainCallback
         chainCallback.onDone(finalStatus)
     }
@@ -132,6 +135,10 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
             // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
             ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, /*unfinishedLinks*/"???"))
         }
+    }
+
+    override fun chainFinished() {
+        ConsoleLogger.log(TAG, "chainFinished")
     }
 
     /* ***************** */
