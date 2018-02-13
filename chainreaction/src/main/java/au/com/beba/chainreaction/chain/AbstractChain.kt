@@ -3,7 +3,7 @@ package au.com.beba.chainreaction.chain
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import au.com.beba.chainreaction.reactor.PassThroughReactor
 
-abstract class AbstractChain(private val reactor: Reactor = PassThroughReactor()) : Chain {
+abstract class AbstractChain(override val reactor: Reactor = PassThroughReactor()) : Chain {
     @Suppress("PropertyName")
     protected open val TAG: String = AbstractChain::class.java.simpleName
 

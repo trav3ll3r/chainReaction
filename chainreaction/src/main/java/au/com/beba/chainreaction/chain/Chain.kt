@@ -1,6 +1,7 @@
 package au.com.beba.chainreaction.chain
 
 interface Chain {
+    val reactor: Reactor
     fun addToChain(vararg chainLinks: Chain): Chain
 
     fun startChain(callback: ChainCallback)

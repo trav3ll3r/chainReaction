@@ -6,9 +6,7 @@ import org.jetbrains.anko.doAsync
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class BaseChain(
-        @Suppress("MemberVisibilityCanBePrivate") protected val reactor: Reactor = BaseReactorWithPhases()
-) :
+abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()) :
         AbstractChain(reactor),
         ChainWithDecision,
         ChainDecisionListener,
@@ -18,12 +16,14 @@ abstract class BaseChain(
     override val TAG: String = BaseChain::class.java.simpleName
 
     private val links: MutableList<Chain> = mutableListOf()
-    private val reactions: MutableList<Reaction> = mutableListOf()
+    private val chainReactions: MutableList<Reaction> = mutableListOf()
+    override val reactions: MutableList<Reaction>
+        get() = chainReactions
 
     private lateinit var chainCallback: ChainCallback
 
     init {
-        reactions.add(Reaction(type = "LOGGER", task = {
+        addReaction(Reaction("LOGGER", {
             ConsoleLogger.log(TAG, "{%s} %s result=%s".format("REACTION", "LOGGER", getChainResult()))
         }))
     }
@@ -34,7 +34,7 @@ abstract class BaseChain(
     }
 
     final override fun addReaction(reaction: Reaction) {
-        reactions.add(reaction)
+        chainReactions.add(reaction)
     }
 
     override fun getChainLinks(): List<Chain> {
@@ -151,11 +151,13 @@ abstract class BaseChain(
     /**
      * Runs all Reactions for this Chain
      */
-    override fun reactionsPhase(): () -> Any? {
+    private fun reactionsPhase(): () -> Any? {
         ConsoleLogger.log(TAG, "reactionsPhase")
-        reactions.forEach { it.task.invoke(Unit) }
-
+        runReactions()
         return decisionPhase()
     }
 
+    override fun runReactions() {
+        reactions.forEach { it.task.invoke(this) }
+    }
 }
