@@ -7,19 +7,30 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
-import android.widget.Button
-import au.com.beba.chainReaction.feature.ChainView
-import au.com.beba.chainReaction.testData.*
-import au.com.beba.chainreaction.chain.Chain
-import org.jetbrains.anko.find
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.RelativeLayout
+import au.com.beba.chainReaction.feature.ChainView
+import au.com.beba.chainReaction.testData.AChain
+import au.com.beba.chainReaction.testData.AbcChain
+import au.com.beba.chainReaction.testData.BChain
+import au.com.beba.chainReaction.testData.C1Chain
+import au.com.beba.chainReaction.testData.C2Chain
+import au.com.beba.chainReaction.testData.CChain
+import au.com.beba.chainReaction.testData.DChain
+import au.com.beba.chainReaction.testData.E1Chain
+import au.com.beba.chainReaction.testData.EChain
+import au.com.beba.chainReaction.testData.FChain
+import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
+import au.com.beba.chainreaction.chain.Reaction
+import au.com.beba.chainreaction.logger.ConsoleLogger
+import org.jetbrains.anko.find
 import java.util.concurrent.atomic.AtomicInteger
 
-const val CHAIN_REACTION_EVENT : String = "au.com.beba.chainReaction.CHAIN_REACTION_EVENT"
-const val CHAIN_CLASS : String = "au.com.beba.chainReaction.CHAIN_CLASS"
+const val CHAIN_REACTION_EVENT: String = "au.com.beba.chainReaction.CHAIN_REACTION_EVENT"
+const val CHAIN_CLASS: String = "au.com.beba.chainReaction.CHAIN_CLASS"
 
 class VisualiseChainActivity : AppCompatActivity() {
 
@@ -31,7 +42,6 @@ class VisualiseChainActivity : AppCompatActivity() {
 
     private val localBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-//            Log.v(tag, "Received broadcast intent [%s]".format(intent))
             val bundle = intent?.extras
             if (bundle != null) {
                 val chainTag = bundle[CHAIN_CLASS] as String
@@ -41,6 +51,15 @@ class VisualiseChainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private val broadcastReaction = Reaction("BROADCASTER", { chain ->
+        if (chain.reactor is ReactorWithBroadcastIml) {
+            val reactor = chain.reactor as ReactorWithBroadcastIml
+            val chainTag = chain::class.java.simpleName
+            ConsoleLogger.log(tag, "Send broadcast reaction with tag [%s]".format(chainTag))
+            reactor.localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, chainTag))
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +72,7 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun visualise() {
+        clearChain()
         topChain = buildChain()
         drawChain(topChain, null, rootAnchorView)
     }
@@ -86,6 +106,10 @@ class VisualiseChainActivity : AppCompatActivity() {
         }
 
         return newAnchor
+    }
+
+    private fun clearChain() {
+        canvas.removeAllViews()
     }
 
     private fun placeChainView(chain: Chain, parent: Chain?, anchor: View): View {
@@ -166,8 +190,12 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun buildChain(): Chain {
-        return AChain(this).addToChain(
-                BChain(this),
+        val a = AChain(this)
+        a.addReaction(broadcastReaction)
+        val b = BChain(this)
+        b.addReaction(broadcastReaction)
+        return a.addToChain(
+                b,
                 CChain(this).addToChain(C1Chain(this), C2Chain(this)),
                 DChain(this),
                 EChain(this).addToChain(E1Chain(this)),

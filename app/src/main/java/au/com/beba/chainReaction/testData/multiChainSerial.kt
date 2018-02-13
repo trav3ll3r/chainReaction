@@ -17,7 +17,9 @@ abstract class AbcChain(context: Context)
 
     override fun preMainTask() {
         super.preMainTask()
-        (reactor as ReactorWithBroadcastIml).localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, this::class.java.simpleName))
+        val chainTag = this::class.java.simpleName
+        ConsoleLogger.log(TAG, "Send broadcast with tag [%s]".format(chainTag))
+        (reactor as ReactorWithBroadcastIml).localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, chainTag))
     }
 
     override fun getChainTask(): ChainTask {
@@ -28,6 +30,10 @@ abstract class AbcChain(context: Context)
                 callback.onResult(this, status, taskResult)
             }
         }
+    }
+
+    override fun runReactions() {
+        reactions.forEach { it.task.invoke(this) }
     }
 
     fun getSleepTime(): Long {
