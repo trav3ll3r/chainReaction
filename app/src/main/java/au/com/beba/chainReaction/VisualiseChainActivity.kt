@@ -85,6 +85,8 @@ class VisualiseChainActivity : AppCompatActivity() {
     private fun executeChain() {
         registerListener()
 
+        ConsoleLogger.log("", "begin --> \"topChain\"")
+
         topChain.startChain(object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
                 //TODO: FIND A BETTER PLACE TO UNREGISTER
@@ -168,15 +170,23 @@ class VisualiseChainActivity : AppCompatActivity() {
 
     private fun buildChain(): Chain {
         val a = AChain(this)
-        a.addReaction(broadcastReaction)
+//                a.addReaction(broadcastReaction)
         val b = BChain(this)
-        b.addReaction(broadcastReaction)
+        b.addToChain(B1Chain(this))
+//        b.addReaction(broadcastReaction)
+
+//        val c = CChain(this).addToChain(C1Chain(this), C2Chain(this))
+        val c = CChain(this)
+//        val d = DChain(this)
+//        val e = EChain(this).addToChain(E1Chain(this))
+//        val f = FChain(this)
         return a.addToChain(
                 b,
-                CChain(this).addToChain(C1Chain(this), C2Chain(this)),
-                DChain(this),
-                EChain(this).addToChain(E1Chain(this)),
-                FChain(this))
+                c
+//                d,
+//                e,
+//                f
+        )
     }
 
     private fun showChainInspection(chainTag: String) {

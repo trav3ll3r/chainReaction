@@ -46,7 +46,7 @@ abstract class AbcChain(context: Context)
 
     fun getSleepTime(): Long {
         val defaultSleep: Long = 200
-        val sleepMultiplier: Long = 2
+        val sleepMultiplier: Long = 5
         return defaultSleep * sleepMultiplier
     }
 
@@ -67,6 +67,12 @@ class BChain(context: Context) : AbcChain(context) {
     @Suppress("PropertyName")
     override val TAG: String = BChain::class.java.simpleName
     override val taskResult = "B"
+}
+
+class B1Chain(context: Context) : AbcChain(context) {
+    @Suppress("PropertyName")
+    override val TAG: String = B1Chain::class.java.simpleName
+    override val taskResult = "B1"
 }
 
 class CChain(context: Context) : AbcChain(context) {
