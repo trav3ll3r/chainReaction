@@ -3,14 +3,12 @@ package au.com.beba.chainreaction
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.logger.ConsoleLogger
-import au.com.beba.chainreaction.testData.A1ChainSuccess
-import au.com.beba.chainreaction.testData.B1ChainSuccess
 import org.junit.Assert
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
 abstract class AbstractUnitTest {
-    private fun getTag():String = this.javaClass.simpleName
+    private fun getTag(): String = this.javaClass.simpleName
 
     protected abstract fun buildChain(): Chain
 

@@ -58,6 +58,13 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         f.get()
     }
 
+    private fun startSubChain(callback: ChainCallback): () -> Any? {
+        ConsoleLogger.log(TAG, "startSubChain")
+        chainCallback = callback
+        preMainTaskPhase()
+        return {}
+    }
+
     /**
      * Calls [preMainTask] and then [mainTaskPhase]
      */
@@ -154,11 +161,15 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 
     override fun linksPhase(): () -> Any? {
         val linksPhaseTag = "LINKS"
-        val nextLink = links.find { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
-        if (nextLink != null) {
-            ConsoleLogger.log(TAG, "{%s} starting Link %s".format(linksPhaseTag, nextLink.javaClass.simpleName))
-            nextLink.startChain(childChainCallback)
-        }
+        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
+//        if (nextLink != null) {
+//            ConsoleLogger.log(TAG, "{%s} starting Link %s".format(linksPhaseTag, nextLink.javaClass.simpleName))
+//            nextLink.startChain(childChainCallback)
+//        }
+
+//        links.forEach { reactor.chainExecutor.submit( { it.startChain(childChainCallback) } )}
+//        links.forEach { reactor.chainExecutor.submit( { (it as BaseChain).startSubChain(childChainCallback) } )}
+        notStartedLinks.forEach { reactor.chainExecutor.submit( (it as BaseChain).startSubChain(childChainCallback) )}
 
         return {}
     }

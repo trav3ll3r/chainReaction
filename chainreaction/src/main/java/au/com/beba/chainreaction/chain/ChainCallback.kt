@@ -6,6 +6,7 @@ interface ChainCallback {
     enum class Status {
         NONE,
         NOT_STARTED,
+        QUEUED,
         IN_PROGRESS,
         ERROR,
         SUCCESS

@@ -1,8 +1,8 @@
 package au.com.beba.chainreaction.chain
 
-import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 
 interface Reactor {
     val chainDecision: ChainDecision
-    val chainExecutor: Executor
+    val chainExecutor: ExecutorService
 }
