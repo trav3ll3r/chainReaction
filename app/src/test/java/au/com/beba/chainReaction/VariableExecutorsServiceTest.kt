@@ -26,14 +26,6 @@ class VariableExecutorsServiceTest {
         assertParallelResults()
     }
 
-    private fun getTaskAsEmptyClosure(id: Int, duration: Long = 200): () -> Any? {
-        System.out.printf("%s #%d  - START\n".format(taskName, id))
-        Thread.sleep(duration)
-        registerResult(id)
-        System.out.printf("%s #%d - END\n".format(taskName, id))
-        return {}
-    }
-
     @Test
     fun closureWithBodyOnSerial() {
         testClosureWithBody(serialExecutor)
@@ -46,7 +38,8 @@ class VariableExecutorsServiceTest {
         assertParallelResults()
     }
 
-    private fun getTaskAsClosure(id: Int, duration: Long = 200): () -> Any? {
+    // VERSION #1
+    private fun getTaskAsClosureWithBody(id: Int, duration: Long = 200): () -> Any? {
         return {
             System.out.printf("%s #%d  - START\n".format(taskName, id))
             Thread.sleep(duration)
@@ -55,6 +48,28 @@ class VariableExecutorsServiceTest {
         }
     }
 
+    // VERSION #2
+    private fun getTaskAsEmptyClosure(id: Int, duration: Long = 200): () -> Any? {
+        System.out.printf("%s #%d  - START\n".format(taskName, id))
+        Thread.sleep(duration)
+        registerResult(id)
+        System.out.printf("%s #%d - END\n".format(taskName, id))
+        return {}
+    }
+
+    // VERSION #1
+    private fun testClosureWithBody(executorService: ExecutorService) {
+        results = mutableListOf()
+
+        executorService.invokeAll(
+                mutableListOf(
+                        Callable(getTaskAsClosureWithBody(1, 500)),
+                        Callable(getTaskAsClosureWithBody(2, 300)),
+                        Callable(getTaskAsClosureWithBody(3))
+                ))
+    }
+
+    // VERSION #2
     private fun testEmptyClosure(executorService: ExecutorService) {
         results = mutableListOf()
 
@@ -63,17 +78,6 @@ class VariableExecutorsServiceTest {
                         Callable { getTaskAsEmptyClosure(1, 500) },
                         Callable { getTaskAsEmptyClosure(2, 300) },
                         Callable { getTaskAsEmptyClosure(3) }
-                ))
-    }
-
-    private fun testClosureWithBody(executorService: ExecutorService) {
-        results = mutableListOf()
-
-        executorService.invokeAll(
-                mutableListOf(
-                        Callable(getTaskAsClosure(1, 500)),
-                        Callable(getTaskAsClosure(2, 300)),
-                        Callable(getTaskAsClosure(3))
                 ))
     }
 

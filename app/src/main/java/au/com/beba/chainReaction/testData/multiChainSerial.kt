@@ -1,6 +1,5 @@
 package au.com.beba.chainReaction.testData
 
-import android.content.Context
 import android.content.Intent
 import au.com.beba.chainReaction.CHAIN_CLASS
 import au.com.beba.chainReaction.CHAIN_EVENT
@@ -9,12 +8,15 @@ import au.com.beba.chainReaction.ReactorWithBroadcastIml
 import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.ChainTask
+import au.com.beba.chainreaction.chain.Reactor
 import au.com.beba.chainreaction.logger.ConsoleLogger
+import au.com.beba.chainreaction.reactor.PassThroughReactor
 
-abstract class AbcChain(context: Context)
-    : BaseChain(reactor = ReactorWithBroadcastIml(context)) {
+abstract class AbcChain(override val reactor: Reactor)
+    : BaseChain(reactor) {
     protected open val status = ChainCallback.Status.SUCCESS
     protected open val taskResult = "?"
+    var defaultSleep: Long = 200
 
     override fun preMainTask() {
         super.preMainTask()
@@ -47,7 +49,6 @@ abstract class AbcChain(context: Context)
     }
 
     fun getSleepTime(): Long {
-        val defaultSleep: Long = 200
         val sleepMultiplier: Long = 5
         return defaultSleep * sleepMultiplier
     }
@@ -59,61 +60,61 @@ abstract class AbcChain(context: Context)
     }
 }
 
-class AChain(context: Context) : AbcChain(context) {
+class AChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = AChain::class.java.simpleName
     override val taskResult = "A"
 }
 
-class BChain(context: Context) : AbcChain(context) {
+class BChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = BChain::class.java.simpleName
     override val taskResult = "B"
 }
 
-class B1Chain(context: Context) : AbcChain(context) {
+class B1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = B1Chain::class.java.simpleName
     override val taskResult = "B1"
 }
 
-class CChain(context: Context) : AbcChain(context) {
+class CChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = CChain::class.java.simpleName
     override val taskResult = "C"
 }
 
-class C1Chain(context: Context) : AbcChain(context) {
+class C1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = C1Chain::class.java.simpleName
     override val taskResult = "C1"
 }
 
-class C2Chain(context: Context) : AbcChain(context) {
+class C2Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = C2Chain::class.java.simpleName
     override val taskResult = "C2"
 }
 
-class DChain(context: Context) : AbcChain(context) {
+class DChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = DChain::class.java.simpleName
     override val taskResult = "D"
 }
 
-class EChain(context: Context) : AbcChain(context) {
+class EChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = EChain::class.java.simpleName
     override val taskResult = "E"
 }
 
-class E1Chain(context: Context) : AbcChain(context) {
+class E1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = E1Chain::class.java.simpleName
     override val taskResult = "E1"
 }
 
-class FChain(context: Context) : AbcChain(context) {
+class FChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = FChain::class.java.simpleName
     override val taskResult = "F1"

@@ -19,6 +19,8 @@ import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.find
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -85,11 +87,14 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         ConsoleLogger.log("", "begin --> \"topChain\"")
 
-        topChain.startChain(object : ChainCallback {
+//        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+        val chainExecutor: ExecutorService = Executors.newFixedThreadPool(10)
+        chainExecutor.submit(topChain.startChain(object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
                 //TODO: DO SOMETHING ONCE ENTIRE CHAIN HAS COMPLETED (SUCCESS / ERROR)
+                ConsoleLogger.log("", "done --> \"topChain\"")
             }
-        })
+        }))
     }
 
     private var receiverRegistered: AtomicBoolean = AtomicBoolean(false)
@@ -173,23 +178,26 @@ class VisualiseChainActivity : AppCompatActivity() {
     }
 
     private fun buildChain(): Chain {
-        val a = AChain(this)
-//                a.addReaction(broadcastReaction)
-        val b = BChain(this)
-        b.addToChain(B1Chain(this))
-//        b.addReaction(broadcastReaction)
+//        val serialReactor = ReactorWithBroadcastIml(this)
+        val parallelReactor = ReactorWithBroadcastIml(this, Executors.newFixedThreadPool(4))
 
-//        val c = CChain(this).addToChain(C1Chain(this), C2Chain(this))
-        val c = CChain(this)
-//        val d = DChain(this)
-//        val e = EChain(this).addToChain(E1Chain(this))
-//        val f = FChain(this)
+//        val a = AChain(serialReactor)
+        val a = AChain(parallelReactor)
+        val b = BChain(parallelReactor)
+        b.addToChain(B1Chain(parallelReactor))
+
+        val c1 = C1Chain(parallelReactor)
+        c1.defaultSleep = 500
+        val c = CChain(parallelReactor).addToChain(c1, C2Chain(parallelReactor))
+        val d = DChain(parallelReactor)
+        val e = EChain(parallelReactor).addToChain(E1Chain(parallelReactor))
+        val f = FChain(parallelReactor)
         return a.addToChain(
                 b,
-                c
-//                d,
-//                e,
-//                f
+                c,
+                d,
+                e,
+                f
         )
     }
 

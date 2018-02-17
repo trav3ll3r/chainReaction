@@ -20,11 +20,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testSuccess() {
-        val a = AChain(this)
-        val b = BChain(this)
-        val c = CChain(this)
-        val c1 = C1Chain(this)
-        val c2 = C2Chain(this)
+        val serialReactor = ReactorWithBroadcastIml(this)
+        val a = AChain(serialReactor)
+        val b = BChain(serialReactor)
+        val c = CChain(serialReactor)
+        val c1 = C1Chain(serialReactor)
+        val c2 = C2Chain(serialReactor)
 
         a.addToChain(b, c.addToChain(c1, c2))
 
