@@ -154,7 +154,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     private val childChainCallback = object : ChainCallback {
         override fun onDone(status: ChainCallback.Status) {
             ConsoleLogger.log(TAG, "childChainCallback | onDone | start")
-            reactionsPhase()
+            reactionsPhase(true)
             ConsoleLogger.log(TAG, "childChainCallback | onDone | finish")
         }
     }
@@ -171,7 +171,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 //        links.forEach { reactor.chainExecutor.submit( { (it as BaseChain).startSubChain(childChainCallback) } )}
         notStartedLinks.forEach { reactor.chainExecutor.submit( (it as BaseChain).startSubChain(childChainCallback) )}
 
-        return {}
+        return reactionsPhase(false)
     }
 
     /* *************** */
@@ -180,10 +180,13 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /**
      * Runs all Reactions for this Chain
      */
-    private fun reactionsPhase(): () -> Any? {
+    private fun reactionsPhase(skipDecision: Boolean = false): () -> Any? {
         ConsoleLogger.log(TAG, "reactionsPhase")
         runReactions()
-        return decisionPhase()
+        if (!skipDecision) {
+            return decisionPhase()
+        }
+        return {}
     }
 
     override fun runReactions() {
