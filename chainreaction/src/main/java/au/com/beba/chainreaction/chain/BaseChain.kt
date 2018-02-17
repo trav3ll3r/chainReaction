@@ -3,7 +3,9 @@ package au.com.beba.chainreaction.chain
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import au.com.beba.chainreaction.reactor.BaseReactorWithPhases
 import org.jetbrains.anko.doAsync
+import java.util.concurrent.Callable
 import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()) :
@@ -41,13 +43,27 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         return links
     }
 
-    override fun startChain(callback: ChainCallback) {
-        ConsoleLogger.log(TAG, "startChain")
-        chainCallback = callback
+    override fun startChain(callback: ChainCallback): () -> Any? {
+        // VERSION #1
+        return {
+            ConsoleLogger.log(TAG, "startChain")
+            chainCallback = callback
 
-        val chainExecutor: Executor = Executors.newSingleThreadExecutor()
-        chainExecutor.doAsync { preMainTaskPhase() }
+//            val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+            val chainExecutor: ExecutorService = Executors.newCachedThreadPool()
+            chainExecutor.submit(preMainTaskPhase())
+        }
     }
+
+//    override fun startChain(callback: ChainCallback): () -> Any? {
+//        // VERSION #2
+//        ConsoleLogger.log(TAG, "startChain")
+//        chainCallback = callback
+//
+//        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+//        chainExecutor.submit(preMainTaskPhase())
+//        return {}
+//    }
 
     override fun startChainOnSameThread(callback: ChainCallback) {
         ConsoleLogger.log(TAG, "startChainOnSameThread")
@@ -135,12 +151,12 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     override fun onDecisionNotDone() {
         val decisionTag = "DECISION_NOT_DONE"
         // RUN NEXT NOT_STARTED LINK
-        val nextLink = links.find { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
-        if (nextLink != null) {
+        val nextLinks = links.filter { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
+        if (nextLinks.isNotEmpty()) {
             linksPhase()
         } else {
             // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
-            ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, /*unfinishedLinks*/"???"))
+            ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, nextLinks.size))
         }
     }
 
@@ -159,20 +175,34 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         }
     }
 
+    // VERSION #1
     override fun linksPhase(): () -> Any? {
-        val linksPhaseTag = "LINKS"
-        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
-//        if (nextLink != null) {
-//            ConsoleLogger.log(TAG, "{%s} starting Link %s".format(linksPhaseTag, nextLink.javaClass.simpleName))
-//            nextLink.startChain(childChainCallback)
-//        }
+        ConsoleLogger.log(TAG, "linksPhase")
 
-//        links.forEach { reactor.chainExecutor.submit( { it.startChain(childChainCallback) } )}
-//        links.forEach { reactor.chainExecutor.submit( { (it as BaseChain).startSubChain(childChainCallback) } )}
-        notStartedLinks.forEach { reactor.chainExecutor.submit( (it as BaseChain).startSubChain(childChainCallback) )}
+        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
+
+        val toDoTasks: MutableList<Callable<Chain>> = notStartedLinks
+                .map { Callable((it as BaseChain).startSubChain(childChainCallback)) } as MutableList<Callable<Chain>>
+
+        reactor.chainExecutor.invokeAll(toDoTasks)
 
         return reactionsPhase(false)
     }
+
+    // VERSION #1.b
+//    override fun linksPhase(): () -> Any? {
+//        ConsoleLogger.log(TAG, "linksPhase")
+//
+//        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
+//
+//        val toDoTasks: MutableList<Callable<Chain>> = notStartedLinks
+//                .map { Callable((it as BaseChain).startSubChain(childChainCallback)) } as MutableList<Callable<Chain>> // VERSION #1
+////                .map { Callable { it.startChain(childChainCallback) } } as MutableList<Callable<Chain>> // VERSION #2
+//
+//        reactor.chainExecutor.invokeAll(toDoTasks)
+//
+//        return reactionsPhase(false)
+//    }
 
     /* *************** */
     /* REACTIONS PHASE */
