@@ -3,6 +3,7 @@ package au.com.beba.chainReaction.testData
 import android.content.Context
 import android.content.Intent
 import au.com.beba.chainReaction.CHAIN_CLASS
+import au.com.beba.chainReaction.CHAIN_EVENT
 import au.com.beba.chainReaction.CHAIN_REACTION_EVENT
 import au.com.beba.chainReaction.ReactorWithBroadcastIml
 import au.com.beba.chainreaction.chain.BaseChain
@@ -17,7 +18,7 @@ abstract class AbcChain(context: Context)
 
     override fun preMainTask() {
         super.preMainTask()
-        broadcastChainChanged()
+        broadcastChainChanged("preMainTask")
     }
 
     override fun getChainTask(): ChainTask {
@@ -32,7 +33,7 @@ abstract class AbcChain(context: Context)
 
     override fun postMainTask() {
         super.postMainTask()
-        broadcastChainChanged()
+        broadcastChainChanged("postMainTask")
     }
 
     override fun runReactions() {
@@ -41,7 +42,8 @@ abstract class AbcChain(context: Context)
 
     override fun chainFinished() {
         super.chainFinished()
-        broadcastChainChanged()
+        ConsoleLogger.log("FireBroadcast chainFinished %s".format(this::class.java.simpleName))
+        broadcastChainChanged("chainFinished")
     }
 
     fun getSleepTime(): Long {
@@ -50,10 +52,10 @@ abstract class AbcChain(context: Context)
         return defaultSleep * sleepMultiplier
     }
 
-    private fun broadcastChainChanged() {
+    private fun broadcastChainChanged(event: String) {
         val chainTag = this::class.java.simpleName
         ConsoleLogger.log(TAG, "Send broadcast with tag [%s]".format(chainTag))
-        (reactor as ReactorWithBroadcastIml).localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, chainTag))
+        (reactor as ReactorWithBroadcastIml).localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, chainTag).putExtra(CHAIN_EVENT, event))
     }
 }
 

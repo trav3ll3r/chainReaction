@@ -17,13 +17,14 @@ import au.com.beba.chainReaction.feature.ChainView
 import au.com.beba.chainReaction.testData.*
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
-import au.com.beba.chainreaction.chain.Reaction
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.find
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 const val CHAIN_REACTION_EVENT: String = "au.com.beba.chainReaction.CHAIN_REACTION_EVENT"
 const val CHAIN_CLASS: String = "au.com.beba.chainReaction.CHAIN_CLASS"
+const val CHAIN_EVENT: String = "au.com.beba.chainReaction.CHAIN_EVENT"
 
 class VisualiseChainActivity : AppCompatActivity() {
 
@@ -45,21 +46,13 @@ class VisualiseChainActivity : AppCompatActivity() {
             val bundle = intent?.extras
             if (bundle != null) {
                 val chainTag = bundle[CHAIN_CLASS] as String
+                val chainEvent = bundle[CHAIN_EVENT] as String
                 val chain = getChainByTag(chainTag, topChain)
-                Log.v(tag, "Received broadcast chainTag [%s] for chain [%s]".format(chainTag, chain))
+                Log.v(tag, "Received broadcast [%s]@%s [%s]".format(chainTag, chainEvent, chain?.getChainStatus()))
                 updateChainView(chain)
             }
         }
     }
-
-    private val broadcastReaction = Reaction("BROADCASTER", { chain ->
-        if (chain.reactor is ReactorWithBroadcastIml) {
-            val reactor = chain.reactor as ReactorWithBroadcastIml
-            val chainTag = chain::class.java.simpleName
-            ConsoleLogger.log(tag, "Send broadcast reaction with tag [%s]".format(chainTag))
-            reactor.localBroadcast.sendBroadcast(Intent(CHAIN_REACTION_EVENT).putExtra(CHAIN_CLASS, chainTag))
-        }
-    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +69,11 @@ class VisualiseChainActivity : AppCompatActivity() {
         inspectChainStatus = find(R.id.inspect_chain_status)
     }
 
+    override fun onDestroy() {
+        unregisterListener()
+        super.onDestroy()
+    }
+
     private fun visualise() {
         clearChain()
         topChain = buildChain()
@@ -89,19 +87,25 @@ class VisualiseChainActivity : AppCompatActivity() {
 
         topChain.startChain(object : ChainCallback {
             override fun onDone(status: ChainCallback.Status) {
-                //TODO: FIND A BETTER PLACE TO UNREGISTER
-                //TODO: HAPPENS TO SOON AND LAST EVENTS DON'T GET PROCESSED
-                //unregisterListener()
+                //TODO: DO SOMETHING ONCE ENTIRE CHAIN HAS COMPLETED (SUCCESS / ERROR)
             }
         })
     }
 
+    private var receiverRegistered: AtomicBoolean = AtomicBoolean(false)
+
     private fun registerListener() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(localBroadcastReceiver, IntentFilter(CHAIN_REACTION_EVENT))
+        if (!receiverRegistered.get()) {
+            receiverRegistered.getAndSet(true)
+            LocalBroadcastManager.getInstance(this).registerReceiver(localBroadcastReceiver, IntentFilter(CHAIN_REACTION_EVENT))
+        }
     }
 
     private fun unregisterListener() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(localBroadcastReceiver)
+        if (receiverRegistered.get()) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(localBroadcastReceiver)
+            receiverRegistered.getAndSet(false)
+        }
     }
 
     private var bottomMost: View? = null
