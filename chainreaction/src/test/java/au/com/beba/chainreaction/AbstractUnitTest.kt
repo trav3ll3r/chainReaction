@@ -22,8 +22,8 @@ abstract class AbstractUnitTest {
 
         val testChain = buildChain()
 
-        val chainReactionCallback = object : ChainCallback {
-            override fun onDone(status: ChainCallback.Status) {
+        val chainReactionCallback = object : ChainCallback<Chain> {
+            override fun onDone(completedChain: Chain) {
                 callbackExecuted = true
                 log("--- ASSERT START ---")
 

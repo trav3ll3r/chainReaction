@@ -22,7 +22,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     override val reactions: MutableList<Reaction>
         get() = chainReactions
 
-    private lateinit var chainCallback: ChainCallback
+    private lateinit var chainCallback: ChainCallback<Chain>
 
     init {
         addReaction(Reaction("LOGGER", {
@@ -43,7 +43,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         return links
     }
 
-    override fun startChain(callback: ChainCallback): () -> Any? {
+    override fun startChain(callback: ChainCallback<Chain>): () -> Any? {
         // VERSION #1
         return {
             ConsoleLogger.log(TAG, "startChain")
@@ -65,7 +65,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 //        return {}
 //    }
 
-    override fun startChainOnSameThread(callback: ChainCallback) {
+    override fun startChainOnSameThread(callback: ChainCallback<Chain>) {
         ConsoleLogger.log(TAG, "startChainOnSameThread")
         chainCallback = callback
 
@@ -74,7 +74,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         f.get()
     }
 
-    private fun startSubChain(callback: ChainCallback): () -> Any? {
+    private fun startSubChain(callback: ChainCallback<Chain>): () -> Any? {
         ConsoleLogger.log(TAG, "startSubChain")
         chainCallback = callback
         preMainTaskPhase()
@@ -145,7 +145,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         chainFinished()
 
         // NOTIFY PARENT chainCallback
-        chainCallback.onDone(finalStatus)
+        chainCallback.onDone(this)
     }
 
     override fun onDecisionNotDone() {
@@ -167,8 +167,8 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /* ***************** */
     /* CHAIN LINKS PHASE */
     /* ***************** */
-    private val childChainCallback = object : ChainCallback {
-        override fun onDone(status: ChainCallback.Status) {
+    private val childChainCallback = object : ChainCallback<Chain> {
+        override fun onDone(completedChain: Chain) {
             ConsoleLogger.log(TAG, "childChainCallback | onDone | start")
             reactionsPhase(true)
             ConsoleLogger.log(TAG, "childChainCallback | onDone | finish")

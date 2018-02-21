@@ -4,8 +4,8 @@ interface Chain {
     val reactor: Reactor
     fun addToChain(vararg chainLinks: Chain): Chain
 
-    fun startChain(callback: ChainCallback): () -> Any?
-    fun startChainOnSameThread(callback: ChainCallback)
+    fun startChain(callback: ChainCallback<Chain>): () -> Any?
+    fun startChainOnSameThread(callback: ChainCallback<Chain>)
 
     // PHASES
     fun preMainTask()
