@@ -89,8 +89,8 @@ class VisualiseChainActivity : AppCompatActivity() {
 
 //        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
         val chainExecutor: ExecutorService = Executors.newFixedThreadPool(10)
-        chainExecutor.submit(topChain.startChain(object : ChainCallback {
-            override fun onDone(status: ChainCallback.Status) {
+        chainExecutor.submit(topChain.startChain(object : ChainCallback<Chain> {
+            override fun onDone(completedChain: Chain) {
                 //TODO: DO SOMETHING ONCE ENTIRE CHAIN HAS COMPLETED (SUCCESS / ERROR)
                 ConsoleLogger.log("", "done --> \"topChain\"")
             }

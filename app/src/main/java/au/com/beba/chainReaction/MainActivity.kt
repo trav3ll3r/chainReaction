@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import au.com.beba.chainReaction.testData.*
+import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.find
@@ -29,8 +30,8 @@ class MainActivity : AppCompatActivity() {
 
         a.addToChain(b, c.addToChain(c1, c2))
 
-        val chainReactionCallback = object : ChainCallback {
-            override fun onDone(status: ChainCallback.Status) {
+        val chainReactionCallback = object : ChainCallback<Chain> {
+            override fun onDone(completedChain: Chain) {
 
                 ConsoleLogger.log("--- ASSERT START ---")
                 ConsoleLogger.log("--- ASSERT DONE ---")
