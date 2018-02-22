@@ -1,22 +1,27 @@
 package au.com.beba.chainreaction.chain
 
-interface Chain {
+import java.util.concurrent.Callable
+
+interface Chain : Callable<Any?> {
     val reactor: Reactor
     fun addToChain(vararg chainLinks: Chain): Chain
 
-    fun startChain(callback: ChainCallback<Chain>): () -> Any?
-    fun startChainOnSameThread(callback: ChainCallback<Chain>)
+    fun setParentCallback(parentCallback: ChainCallback<Chain>): Chain
 
     // PHASES
     fun preMainTask()
     fun getChainTask(): ChainTask
     fun postMainTask()
-    fun linksPhase(): () -> Any?
-    fun chainFinished()
+    fun chainFinishing()
 
     fun getChainLinks(): List<Chain>
     fun getChainResult(): Any?
     fun getMainTaskStatus(): ChainCallback.Status
     fun getChainStatus(): ChainCallback.Status
     fun setChainStatus(newStatus: ChainCallback.Status)
+}
+
+enum class ExecutionStrategy {
+    SERIAL,
+    PARALLEL
 }

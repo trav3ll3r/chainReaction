@@ -8,7 +8,7 @@ abstract class AbstractChain(override val reactor: Reactor = PassThroughReactor(
     protected open val TAG: String = AbstractChain::class.java.simpleName
 
     private var result: Any? = null
-    private var status = ChainCallback.Status.NOT_STARTED
+    private var chainStatus = ChainCallback.Status.NOT_STARTED
     protected var chainMainTaskStatus = ChainCallback.Status.NONE
 
     override fun getChainResult(): Any? {
@@ -25,11 +25,11 @@ abstract class AbstractChain(override val reactor: Reactor = PassThroughReactor(
     }
 
     override fun getChainStatus(): ChainCallback.Status {
-        return this.status
+        return this.chainStatus
     }
 
     override fun setChainStatus(newStatus: ChainCallback.Status) {
-        ConsoleLogger.log(TAG, "setChainStatus | status=%s => %s".format(this.status, newStatus))
-        this.status = newStatus
+        ConsoleLogger.log(TAG, "setChainStatus | status=%s => %s".format(this.chainStatus, newStatus))
+        this.chainStatus = newStatus
     }
 }

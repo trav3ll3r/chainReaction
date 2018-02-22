@@ -2,27 +2,24 @@ package au.com.beba.chainreaction.chain
 
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import au.com.beba.chainreaction.reactor.BaseReactorWithPhases
-import org.jetbrains.anko.doAsync
-import java.util.concurrent.Callable
-import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorCompletionService
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()) :
         AbstractChain(reactor),
-        ChainWithDecision,
-        ChainDecisionListener,
         ChainWithReactions {
 
     @Suppress("PropertyName")
     override val TAG: String = BaseChain::class.java.simpleName
 
+    //    private var linksExecutionStrategy: ExecutionStrategy = ExecutionStrategy.SERIAL
     private val links: MutableList<Chain> = mutableListOf()
     private val chainReactions: MutableList<Reaction> = mutableListOf()
     override val reactions: MutableList<Reaction>
         get() = chainReactions
 
-    private lateinit var chainCallback: ChainCallback<Chain>
+    private lateinit var parentChainCallback: ChainCallback<Chain>
 
     init {
         addReaction(Reaction("LOGGER", {
@@ -31,7 +28,10 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     }
 
     override fun addToChain(vararg chainLinks: Chain): Chain {
-        links.addAll(chainLinks)
+        chainLinks.forEach {
+            it.setParentCallback(childChainCallback)
+            links.add(it)
+        }
         return this
     }
 
@@ -43,52 +43,28 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         return links
     }
 
-    override fun startChain(callback: ChainCallback<Chain>): () -> Any? {
-        // VERSION #1
-        return {
-            ConsoleLogger.log(TAG, "startChain")
-            chainCallback = callback
-
-//            val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
-            val chainExecutor: ExecutorService = Executors.newCachedThreadPool()
-            chainExecutor.submit(preMainTaskPhase())
-        }
+    override fun setParentCallback(parentCallback: ChainCallback<Chain>): Chain {
+        this.parentChainCallback = parentCallback
+        return this
     }
 
-//    override fun startChain(callback: ChainCallback): () -> Any? {
-//        // VERSION #2
-//        ConsoleLogger.log(TAG, "startChain")
-//        chainCallback = callback
-//
-//        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
-//        chainExecutor.submit(preMainTaskPhase())
-//        return {}
-//    }
-
-    override fun startChainOnSameThread(callback: ChainCallback<Chain>) {
-        ConsoleLogger.log(TAG, "startChainOnSameThread")
-        chainCallback = callback
-
-        val chainExecutor: Executor = Executors.newSingleThreadExecutor()
-        val f = chainExecutor.doAsync { preMainTaskPhase() }
-        f.get()
-    }
-
-    private fun startSubChain(callback: ChainCallback<Chain>): () -> Any? {
-        ConsoleLogger.log(TAG, "startSubChain")
-        chainCallback = callback
+    override fun call(): Any? {
+        ConsoleLogger.log(TAG, "%s START @ %s".format(this::class.java.simpleName, Thread.currentThread().name))
         preMainTaskPhase()
-        return {}
+        mainTaskPhase()
+        postMainTaskPhase()
+        linksPhase()
+        ConsoleLogger.log(TAG, "%s END".format(this::class.java.simpleName))
+        return getChainResult()
     }
 
     /**
      * Calls [preMainTask] and then [mainTaskPhase]
      */
-    private fun preMainTaskPhase(): () -> Any? {
+    private fun preMainTaskPhase() {
         ConsoleLogger.log(TAG, "preMainTaskPhase")
-        setChainStatus(ChainCallback.Status.IN_PROGRESS)
+        setChainStatus(ChainCallback.Status.QUEUED)
         preMainTask()
-        return mainTaskPhase()
     }
 
     override fun preMainTask() {
@@ -98,70 +74,30 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /**
      * Calls [getChainTask] and then [postMainTaskPhase]
      */
-    private fun mainTaskPhase(): () -> Any? {
+    private fun mainTaskPhase() {
         // RUN ChainTask (MAIN TASK)
         ConsoleLogger.log(TAG, "mainTaskPhase | run MainTask")
+        setChainStatus(ChainCallback.Status.IN_PROGRESS)
         getChainTask().run(object : ChainTask.ChainTaskCallback {
             override fun onResult(task: ChainTask, newMainTaskStatus: ChainCallback.Status, taskResult: Any?) {
-                ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | taskResult=%s".format(taskResult))
+                ConsoleLogger.log(TAG, "mainTaskPhase:parentChainCallback | onResult | taskResult=%s".format(taskResult))
                 setChainResult(taskResult)
                 chainMainTaskStatus = newMainTaskStatus
-                ConsoleLogger.log(TAG, "mainTaskPhase:chainCallback | onResult | end")
+                ConsoleLogger.log(TAG, "mainTaskPhase:parentChainCallback | onResult | end")
             }
         })
-        ConsoleLogger.log(TAG, "mainTaskPhase | call postMainTaskPhase")
-        return postMainTaskPhase()
     }
 
     /* ******************** */
     /* POST-MAIN TASK PHASE */
     /* ******************** */
-    private fun postMainTaskPhase(): () -> Any? {
+    private fun postMainTaskPhase() {
         ConsoleLogger.log(TAG, "postMainTaskPhase")
         postMainTask()
-        return decisionPhase()
     }
 
     override fun postMainTask() {
         ConsoleLogger.log(TAG, "postMainTask")
-    }
-
-    /* ************** */
-    /* DECISION PHASE */
-    /* ************** */
-    override fun decisionPhase(): () -> Any? {
-        ConsoleLogger.log(TAG, "decisionPhase")
-        reactor.chainDecision.decision(links, chainMainTaskStatus, this)
-        return {}
-    }
-
-    override fun onDecisionDone(finalStatus: ChainCallback.Status) {
-        val decisionTag = "DECISION_DONE"
-        ConsoleLogger.log(TAG, "{%s} all links have result".format(decisionTag))
-
-        ConsoleLogger.log(TAG, "{%s} setting status [%s]".format(decisionTag, finalStatus))
-        setChainStatus(finalStatus)
-
-        chainFinished()
-
-        // NOTIFY PARENT chainCallback
-        chainCallback.onDone(this)
-    }
-
-    override fun onDecisionNotDone() {
-        val decisionTag = "DECISION_NOT_DONE"
-        // RUN NEXT NOT_STARTED LINK
-        val nextLinks = links.filter { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
-        if (nextLinks.isNotEmpty()) {
-            linksPhase()
-        } else {
-            // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
-            ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, nextLinks.size))
-        }
-    }
-
-    override fun chainFinished() {
-        ConsoleLogger.log(TAG, "chainFinished")
     }
 
     /* ***************** */
@@ -170,39 +106,36 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     private val childChainCallback = object : ChainCallback<Chain> {
         override fun onDone(completedChain: Chain) {
             ConsoleLogger.log(TAG, "childChainCallback | onDone | start")
-            reactionsPhase(true)
+            reactionsPhase()
             ConsoleLogger.log(TAG, "childChainCallback | onDone | finish")
         }
     }
 
-    // VERSION #1
-    override fun linksPhase(): () -> Any? {
+    private fun linksPhase() {
         ConsoleLogger.log(TAG, "linksPhase")
 
-        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
+        if (links.isNotEmpty()) {
+            ConsoleLogger.log(TAG, "is starting [%s] sub-chains".format(links.size))
+            val internalExecutor: ExecutorService = when (reactor.executionStrategy) {
+                ExecutionStrategy.SERIAL -> Executors.newSingleThreadExecutor()
+                ExecutionStrategy.PARALLEL -> Executors.newCachedThreadPool()
+            }
+            val completionService: ExecutorCompletionService<Any?> = ExecutorCompletionService(internalExecutor)
 
-        val toDoTasks: MutableList<Callable<Chain>> = notStartedLinks
-                .map { Callable((it as BaseChain).startSubChain(childChainCallback)) } as MutableList<Callable<Chain>>
+            links.forEach {
+                ConsoleLogger.log(TAG, "is submitting [%s]".format(it::class.java.simpleName))
+                completionService.submit(it)
+            }
 
-        reactor.chainExecutor.invokeAll(toDoTasks)
-
-        return reactionsPhase(false)
+            links.forEach {
+                val future = completionService.take()
+                future.get()
+            }
+        } else {
+            ConsoleLogger.log(TAG, "has no sub-chains")
+            reactionsPhase()
+        }
     }
-
-    // VERSION #1.b
-//    override fun linksPhase(): () -> Any? {
-//        ConsoleLogger.log(TAG, "linksPhase")
-//
-//        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
-//
-//        val toDoTasks: MutableList<Callable<Chain>> = notStartedLinks
-//                .map { Callable((it as BaseChain).startSubChain(childChainCallback)) } as MutableList<Callable<Chain>> // VERSION #1
-////                .map { Callable { it.startChain(childChainCallback) } } as MutableList<Callable<Chain>> // VERSION #2
-//
-//        reactor.chainExecutor.invokeAll(toDoTasks)
-//
-//        return reactionsPhase(false)
-//    }
 
     /* *************** */
     /* REACTIONS PHASE */
@@ -210,16 +143,79 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     /**
      * Runs all Reactions for this Chain
      */
-    private fun reactionsPhase(skipDecision: Boolean = false): () -> Any? {
+    private fun reactionsPhase() {
         ConsoleLogger.log(TAG, "reactionsPhase")
         runReactions()
-        if (!skipDecision) {
-            return decisionPhase()
-        }
-        return {}
+        decisionPhase()
     }
 
     override fun runReactions() {
         reactions.forEach { it.task.invoke(this) }
+    }
+
+    /* ************** */
+    /* DECISION PHASE */
+    /* ************** */
+    private fun decisionPhase() {
+        ConsoleLogger.log(TAG, "decisionPhase")
+        val incompleteLinks = links.count { it.getChainStatus() !in listOf(ChainCallback.Status.SUCCESS, ChainCallback.Status.ERROR) }
+        ConsoleLogger.log(TAG, "decisionPhase links[%s] incomplete[%s]".format(links.size, incompleteLinks))
+
+        if (links.isEmpty()) {
+            setChainStatus(decisionLogic())  //DETERMINE FINAL STATUS
+            ConsoleLogger.log(TAG, "no chains to wait for, decision done")
+            finishPhase()
+        } else {
+            if (incompleteLinks == 0) {
+                setChainStatus(decisionLogic())  //DETERMINE FINAL STATUS
+                ConsoleLogger.log(TAG, "received all results, decision done")
+                finishPhase()
+            } else {
+                // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
+                ConsoleLogger.log(TAG, "waiting for all results, decision pending")
+            }
+        }
+    }
+
+    /**
+     * Delegates implementation to the Reactor
+     */
+    private fun decisionLogic(): ChainCallback.Status {
+        return reactor.chainDecision.decision(links, chainMainTaskStatus)
+    }
+
+//    override fun onDecisionDone(finalStatus: ChainCallback.Status) {
+//        val decisionTag = "DECISION_DONE"
+//        ConsoleLogger.log(TAG, "{%s} all links have result".format(decisionTag))
+//
+//        ConsoleLogger.log(TAG, "{%s} setting status [%s]".format(decisionTag, finalStatus))
+//        setChainStatus(finalStatus)
+//
+//        chainFinishing()
+//
+//        // NOTIFY PARENT parentChainCallback
+//        parentChainCallback.onDone(this)
+//    }
+
+//    override fun onDecisionNotDone() {
+//        val decisionTag = "DECISION_NOT_DONE"
+//        // RUN NEXT NOT_STARTED LINK
+//        val nextLinks = links.filter { it.getChainStatus() == ChainCallback.Status.NOT_STARTED }
+//        if (nextLinks.isNotEmpty()) {
+//            linksPhase()
+//        } else {
+//            // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
+//            ConsoleLogger.log(TAG, "{%s} %s links without result, waiting for all".format(decisionTag, nextLinks.size))
+//        }
+//    }
+
+    private fun finishPhase() {
+        ConsoleLogger.log(TAG, "finishPhase")
+        chainFinishing()
+        parentChainCallback.onDone(this)
+    }
+
+    override fun chainFinishing() {
+        ConsoleLogger.log(TAG, "chainFinishing")
     }
 }
