@@ -42,10 +42,10 @@ abstract class AbcChain(override val reactor: Reactor)
         reactions.forEach { it.task.invoke(this) }
     }
 
-    override fun chainFinished() {
-        super.chainFinished()
-        ConsoleLogger.log("FireBroadcast chainFinished %s".format(this::class.java.simpleName))
-        broadcastChainChanged("chainFinished")
+    override fun chainFinishing() {
+        super.chainFinishing()
+        ConsoleLogger.log("FireBroadcast chainFinishing %s".format(this::class.java.simpleName))
+        broadcastChainChanged("chainFinishing")
     }
 
     fun getSleepTime(): Long {

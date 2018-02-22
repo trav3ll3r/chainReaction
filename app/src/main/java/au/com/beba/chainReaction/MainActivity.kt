@@ -9,6 +9,7 @@ import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.find
+import java.util.concurrent.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,17 +30,21 @@ class MainActivity : AppCompatActivity() {
         val c2 = C2Chain(serialReactor)
 
         a.addToChain(b, c.addToChain(c1, c2))
-
-        val chainReactionCallback = object : ChainCallback<Chain> {
+        a.setParentCallback(object : ChainCallback<Chain> {
             override fun onDone(completedChain: Chain) {
-
                 ConsoleLogger.log("--- ASSERT START ---")
                 ConsoleLogger.log("--- ASSERT DONE ---")
             }
-        }
+        })
 
         ConsoleLogger.log("--- START ---")
-        a.startChain(chainReactionCallback)
+        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+        val f: Future<Any?> = chainExecutor.submit(a)
+        while (!f.isDone) {
+            try {
+                f.get(10, TimeUnit.MILLISECONDS)
+            } catch (ignore: TimeoutException) {}
+        }
         ConsoleLogger.log("--- END ---")
     }
 
