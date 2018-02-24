@@ -35,7 +35,7 @@ class VisualiseChainActivity : AppCompatActivity() {
 
     private lateinit var canvas: RelativeLayout
     private lateinit var rootAnchorView: View
-    private lateinit var topChain: Chain
+    private var topChain: Chain? = null
 
     // INSPECT
     private lateinit var inspectHolder: ViewGroup
@@ -50,7 +50,7 @@ class VisualiseChainActivity : AppCompatActivity() {
             if (bundle != null) {
                 val chainTag = bundle[CHAIN_CLASS] as String
                 val chainEvent = bundle[CHAIN_EVENT] as String
-                val chain = getChainByTag(chainTag, topChain)
+                val chain = getChainByTag(chainTag, topChain!!)
                 Log.v(tag, "Received broadcast [%s]@%s [%s]".format(chainTag, chainEvent, chain?.getChainStatus()))
                 updateChainView(chain)
             }
@@ -80,25 +80,27 @@ class VisualiseChainActivity : AppCompatActivity() {
     private fun visualise() {
         clearChain()
         topChain = buildChain()
-        drawChain(topChain, null, rootAnchorView)
+        drawChain(topChain!!, null, rootAnchorView)
     }
 
     private fun executeChain() {
-        registerListener()
+        if (topChain != null) {
+            registerListener()
 
-//        val executionStrategy: ExecutorService = Executors.newSingleThreadExecutor()
-        val chainExecutor: ExecutorService = Executors.newFixedThreadPool(10)
+    //        val executionStrategy: ExecutorService = Executors.newSingleThreadExecutor()
+            val chainExecutor: ExecutorService = Executors.newFixedThreadPool(10)
 
-        ConsoleLogger.log("", "begin --> \"topChain\"")
+            ConsoleLogger.log("", "begin --> \"topChain\"")
 
-        topChain.setParentCallback(object : ChainCallback<Chain> {
-            override fun onDone(completedChain: Chain) {
-                //TODO: DO SOMETHING ONCE ENTIRE CHAIN-REACTION HAS COMPLETED (SUCCESS / ERROR)
-                ConsoleLogger.log("", "done --> \"topChain\"")
-            }
-        })
+            topChain!!.setParentCallback(object : ChainCallback<Chain> {
+                override fun onDone(completedChain: Chain) {
+                    //TODO: DO SOMETHING ONCE ENTIRE CHAIN-REACTION HAS COMPLETED (SUCCESS / ERROR)
+                    ConsoleLogger.log("", "done --> \"topChain\"")
+                }
+            })
 
-        chainExecutor.submit(topChain)
+            chainExecutor.submit(topChain)
+        }
     }
 
     private var receiverRegistered: AtomicBoolean = AtomicBoolean(false)
@@ -145,8 +147,10 @@ class VisualiseChainActivity : AppCompatActivity() {
             parentView = getChainViewByTag(canvas, buildChainTag(parent))
         }
 
-//        v.layoutParams = RelativeLayout.LayoutParams(abcChain.getSleepTime().toInt(), RelativeLayout.LayoutParams.WRAP_CONTENT)
-        v.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        val pixelsPerSecond = resources.getDimensionPixelSize(R.dimen.dips_per_second)
+        val width = (chain.getSleepTime().toDouble() / 1000 * pixelsPerSecond).toInt()
+        v.layoutParams = RelativeLayout.LayoutParams(width, RelativeLayout.LayoutParams.WRAP_CONTENT)
+
         val layoutParams = v.layoutParams as RelativeLayout.LayoutParams
         layoutParams.leftMargin = 2
         layoutParams.topMargin = 2
@@ -190,7 +194,7 @@ class VisualiseChainActivity : AppCompatActivity() {
         b.addToChain(B1Chain(parallelReactor))
 
         val c1 = C1Chain(parallelReactor)
-        c1.defaultSleep = 500
+        c1.sleepMultiplier = 2
         val c = CChain(parallelReactor)
                 .addToChain(c1, C2Chain(parallelReactor))
         val d = DChain(parallelReactor)
@@ -199,14 +203,14 @@ class VisualiseChainActivity : AppCompatActivity() {
         return a.addToChain(
                 b,
                 c,
-                d,
-                e,
-                f
+                d
+                //e,
+                //f
         )
     }
 
     private fun showChainInspection(chainTag: String) {
-        val chain = getChainByTag(chainTag, topChain)
+        val chain = getChainByTag(chainTag, topChain!!)
         if (chain != null) {
             inspectHolder.visibility = View.VISIBLE
             inspectName.text = chain::class.java.simpleName

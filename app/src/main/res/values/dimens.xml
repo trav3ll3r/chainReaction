@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="duration_size">14sp</dimen>
+    <dimen name="chain_name">14sp</dimen>
+    <dimen name="duration_size">11sp</dimen>
     <dimen name="chain_view_padding">8dp</dimen>
+    <dimen name="dips_per_second">80dp</dimen>
 </resources>

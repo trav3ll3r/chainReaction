@@ -16,7 +16,14 @@ abstract class AbcChain(override val reactor: Reactor)
     : BaseChain(reactor) {
     protected open val status = ChainCallback.Status.SUCCESS
     protected open val taskResult = "?"
-    var defaultSleep: Long = 200
+    var defaultSleep: Long = 1000
+    var sleepMultiplier: Long = 1
+
+    val chainId: String
+        get() {
+//            return this::class.java.simpleName
+            return taskResult
+        }
 
     override fun preMainTask() {
         super.preMainTask()
@@ -49,7 +56,7 @@ abstract class AbcChain(override val reactor: Reactor)
     }
 
     fun getSleepTime(): Long {
-        val sleepMultiplier: Long = 5
+
         return defaultSleep * sleepMultiplier
     }
 
