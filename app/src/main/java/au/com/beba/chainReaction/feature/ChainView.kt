@@ -17,8 +17,7 @@ import au.com.beba.chainreaction.chain.ChainCallback
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.find
 
-
-class ChainView : ConstraintLayout {
+class ChainView : BaseView {
 
     private val tag = ChainView::class.java.simpleName
 
@@ -29,20 +28,21 @@ class ChainView : ConstraintLayout {
     private lateinit var chainDuration: TextView
     private lateinit var chainName: TextView
     private lateinit var chainProgress: View
+    private lateinit var innerContent: View
 
-    constructor(context: Context) : super(context) {
-        init()
+    @JvmOverloads
+    constructor(
+            context: Context,
+            attrs: AttributeSet? = null,
+            defStyleAttr: Int = 0)
+            : super(context, attrs, defStyleAttr)
+
+    init {
+        inflateView()
     }
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        init()
-    }
-
-    private fun init() {
+    private fun inflateView() {
+        Log.d(tag, "init for [objId=%s]".format(this))
         inflate(context, R.layout.chain_view, this)
 
         this.myLayout = find(R.id.constraint_layout)
@@ -52,10 +52,12 @@ class ChainView : ConstraintLayout {
         this.chainDuration = find(R.id.execution_duration)
         this.chainName = find(R.id.chain_name)
         this.chainProgress = find(R.id.chain_progress)
+        this.innerContent = find(R.id.inner_content)
     }
 
+
     fun update(chain: AbcChain) {
-        Log.d(tag, "Update for [%s] with status [%s]".format(chain::class.java.simpleName, chain.getChainStatus()))
+        //Log.d(tag, "Update for [%s] with status [%s]".format(chain::class.java.simpleName, chain.getChainStatus()))
         this.chainName.text = chain.chainId
         this.chainDuration.text = chain.getSleepTime().toString()
 
@@ -86,8 +88,10 @@ class ChainView : ConstraintLayout {
 
         // ANIMATE TO NEW CONSTRAINTS
         val set = ConstraintSet()
-        set.connect(R.id.chain_progress, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+//        set.connect(R.id.chain_progress, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+//        set.connect(R.id.chain_progress, ConstraintSet.TOP, innerContent.id, ConstraintSet.TOP)
+//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, innerContent.id, ConstraintSet.BOTTOM)
         set.connect(R.id.chain_progress, ConstraintSet.LEFT, R.id.start_content, ConstraintSet.LEFT)
         set.connect(R.id.chain_progress, ConstraintSet.RIGHT, R.id.end_content, ConstraintSet.RIGHT)
 

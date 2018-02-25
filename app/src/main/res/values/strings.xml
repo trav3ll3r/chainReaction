@@ -2,6 +2,7 @@
     <string name="app_name">Chain Reaction</string>
 
     <!-- BUTTON LABELS -->
-    <string name="btn_start">Start</string>
     <string name="btn_show">Show</string>
+    <string name="btn_clear">Clear</string>
+    <string name="btn_start">Start</string>
 </resources>
