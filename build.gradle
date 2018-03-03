@@ -4,14 +4,14 @@ buildscript {
     ext {
         libs = [
              supportLibVersion       : "27.0.2",
-             firebaseLibVersion      : "11.6.0",
-             constraintLayoutVersion : "1.0.2",
+             firebaseLibVersion      : "11.8.0",
+             constraintLayoutVersion : "1.1.0-beta5",
              daggerVersion           : "2.14.1",
              javaxInjectVersion      : "1",
              gsonVersion             : "2.8.0",
         ]
         kotlin = [
-            kotlinVersion            : "1.2.21",
+            kotlinVersion            : "1.2.30",
             ankoVersion              : "0.10.1",
         ]
         testing = [

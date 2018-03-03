@@ -13,7 +13,8 @@ class ConsoleLogger {
 
         fun log(tag: String, message: String) {
 //            println("%s |%s| %s".format(dateFormatter.format(Date()), tag, message))
-            println("%s | %s".format(tag, message))
+//            println("%s | %s".format(tag, message))
+            println("--> \"%s:%s\"".format(tag, message))
         }
     }
 }

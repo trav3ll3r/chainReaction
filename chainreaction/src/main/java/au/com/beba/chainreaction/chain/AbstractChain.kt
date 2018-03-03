@@ -3,15 +3,15 @@ package au.com.beba.chainreaction.chain
 import au.com.beba.chainreaction.logger.ConsoleLogger
 import au.com.beba.chainreaction.reactor.PassThroughReactor
 
-abstract class AbstractChain(private val reactor: Reactor = PassThroughReactor()) : Chain {
+abstract class AbstractChain(override val reactor: Reactor = PassThroughReactor()) : Chain {
     @Suppress("PropertyName")
     protected open val TAG: String = AbstractChain::class.java.simpleName
 
     private var result: Any? = null
-    private var status = ChainCallback.Status.NOT_STARTED
+    private var chainStatus = ChainCallback.Status.NOT_STARTED
+    protected var chainMainTaskStatus = ChainCallback.Status.NONE
 
     override fun getChainResult(): Any? {
-        //ConsoleLogger.log(TAG, "{%s} getChainResult | taskResult=%s".format("CHAIN", result))
         return result
     }
 
@@ -20,13 +20,16 @@ abstract class AbstractChain(private val reactor: Reactor = PassThroughReactor()
         result = value
     }
 
+    override fun getMainTaskStatus(): ChainCallback.Status {
+        return chainMainTaskStatus
+    }
+
     override fun getChainStatus(): ChainCallback.Status {
-        //ConsoleLogger.log(TAG, "getChainStatus | status=%s".format(status))
-        return this.status
+        return this.chainStatus
     }
 
     override fun setChainStatus(newStatus: ChainCallback.Status) {
-        ConsoleLogger.log(TAG, "setChainStatus | status=%s => %s".format(this.status, newStatus))
-        this.status = newStatus
+        ConsoleLogger.log(TAG, "setChainStatus | status=%s => %s".format(this.chainStatus, newStatus))
+        this.chainStatus = newStatus
     }
 }

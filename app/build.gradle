@@ -60,6 +60,7 @@ dependencies {
     implementation "com.google.dagger:dagger:${libs.daggerVersion}"
     implementation "com.google.dagger:dagger-android:${libs.daggerVersion}"
     implementation "com.google.dagger:dagger-android-support:${libs.daggerVersion}"
+    implementation "com.android.support.constraint:constraint-layout:${libs.constraintLayoutVersion}"
     kapt "com.google.dagger:dagger-compiler:${libs.daggerVersion}"
     kapt "com.google.dagger:dagger-android-processor:${libs.daggerVersion}"
     implementation "javax.inject:javax.inject:${libs.javaxInjectVersion}"

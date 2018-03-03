@@ -3,4 +3,14 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="chainBackground">#7777ee</color>
+    <color name="chainText">#1e1e1e</color>
+
+    <color name="status_border">#333</color>
+    <color name="status_not_started">#eee</color>
+    <color name="status_in_progress">#b1af59</color>
+    <color name="status_success">#7cb159</color>
+    <color name="status_error">#b15963</color>
+
 </resources>

@@ -1,0 +1,79 @@
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/chain_height"
+    >
+
+    <android.support.constraint.Guideline
+        android:id="@+id/start_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/end_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="0dp"
+        />
+
+    <View
+        android:id="@+id/chain_progress"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@color/chainBackground"
+        app:layout_constraintTop_toTopOf="@+id/inner_content"
+        app:layout_constraintBottom_toBottomOf="@+id/inner_content"
+        app:layout_constraintLeft_toLeftOf="@id/start_content"
+        app:layout_constraintRight_toLeftOf="@id/start_content"
+        />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/inner_content"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/chain_height"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/start_content"
+        app:layout_constraintRight_toLeftOf="@id/end_content"
+        android:background="@drawable/square_frame"
+        android:padding="8dp"
+        >
+
+        <TextView
+            android:id="@+id/chain_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/chain_name"
+            android:textColor="@color/chainText"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:paddingTop="@dimen/chain_view_padding"
+            android:paddingLeft="@dimen/chain_view_padding"
+            tools:text="AChain"
+            />
+        <TextView
+            android:id="@+id/execution_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:textSize="@dimen/duration_size"
+            android:textColor="@color/chainText"
+            android:paddingBottom="@dimen/chain_view_padding"
+            android:paddingRight="@dimen/chain_view_padding"
+            tools:text="500"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>
