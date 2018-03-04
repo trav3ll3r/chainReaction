@@ -3,6 +3,6 @@
 
     <!-- BUTTON LABELS -->
     <string name="btn_show">Show</string>
-    <string name="btn_clear">Clear</string>
+    <string name="btn_reset_all">Reset</string>
     <string name="btn_start">Start</string>
 </resources>

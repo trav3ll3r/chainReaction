@@ -5,25 +5,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="au.com.beba.chainReaction.VisualiseChainActivity">
+    tools:context="au.com.beba.chainReaction.StaticMixedChainActivity">
 
     <Button
         android:id="@+id/btn_show_test"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/btn_clear"
+        app:layout_constraintRight_toLeftOf="@+id/btn_reset_all"
         app:layout_constraintVertical_chainStyle="packed"
         android:text="@string/btn_show" />
 
     <Button
-        android:id="@+id/btn_clear"
+        android:id="@+id/btn_reset_all"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/btn_start_test"
         app:layout_constraintLeft_toRightOf="@id/btn_show_test"
-        android:text="@string/btn_clear"
+        android:text="@string/btn_reset_all"
         app:layout_constraintVertical_chainStyle="packed"
         android:visibility="visible"
         />
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/btn_clear"
+        app:layout_constraintLeft_toRightOf="@id/btn_reset_all"
         android:text="@string/btn_start"
         app:layout_constraintVertical_chainStyle="packed"
         android:visibility="visible"

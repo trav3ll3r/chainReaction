@@ -40,15 +40,37 @@ fun findInChain(needle: String, chain: Chain): Chain? {
     return result
 }
 
-fun findChildBefore(parent: Chain, beforeSibling: Chain): Chain? {
-    var previousSibling: Chain? = null
-    for (currentSibling in parent.getChainLinks()) {
-        if (currentSibling == beforeSibling) {
-            return previousSibling
+fun findChildBefore(parent: Chain?, beforeSibling: Chain): Chain? {
+    if (parent != null) {
+        var previousSibling: Chain? = null
+        for (currentSibling in parent.getChainLinks()) {
+            if (currentSibling == beforeSibling) {
+                return previousSibling
+            }
+            previousSibling = currentSibling
         }
-        previousSibling = currentSibling
     }
     return null
+}
+
+fun findChildParent(child: Chain, haystack: Chain): Chain? {
+    var result: Chain? = null
+
+    if (haystack.getChainLinks().contains(child)) {
+        result = haystack
+    } else {
+        val children = haystack.getChainLinks().size
+        if (children > 0) {
+            (0 until children).forEach {
+                val interim = findChildParent(child, haystack.getChainLinks()[it])
+                if (interim != null) {
+                    result = interim
+                    return@forEach
+                }
+            }
+        }
+    }
+    return result
 }
 
 fun buildChainTag(chain: Chain): String {
@@ -107,6 +129,8 @@ fun buildChainPreConnector(context: Context, chain: Chain, parentChain: Chain?):
 
     if (parentChain != null) {
 
+        val firstChild = parentChain.getChainLinks().firstOrNull()
+
         when (parentChain.reactor.executionStrategy) {
             ExecutionStrategy.PARALLEL -> {
                 val links = parentChain.getChainLinks()
@@ -119,7 +143,12 @@ fun buildChainPreConnector(context: Context, chain: Chain, parentChain: Chain?):
             }
 
             ExecutionStrategy.SERIAL -> {
-                connectorType = ConnectorView.Type.SERIAL_SIBLING
+                if (firstChild == chain) {
+                    connectorType = ConnectorView.Type.SERIAL_CHILD
+                }
+                else {
+                    connectorType = ConnectorView.Type.SERIAL_SIBLING
+                }
             }
         }
 

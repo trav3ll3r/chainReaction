@@ -61,26 +61,25 @@ constructor(context: Context, attrs: AttributeSet?, defStyle: Int)
         return this
     }
 
-    fun above(ref: BaseView): BaseView {
-        ConsoleLogger.log(TAG, "%s above %s".format(this.tag, ref.tag))
-        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-        lp.addRule(RelativeLayout.ABOVE, ref.id)
-        return this
-    }
+//    fun above(ref: BaseView): BaseView {
+//        ConsoleLogger.log(TAG, "%s above %s".format(this.tag, ref.tag))
+//        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
+//        lp.addRule(RelativeLayout.ABOVE, ref.id)
+//        return this
+//    }
 
     fun toBottomOf(ref: BaseView): BaseView {
         ConsoleLogger.log(TAG, "%s toBottomOf %s".format(this.tag, ref.tag))
         val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-//        lp.addRule(RelativeLayout.ALIGN_TOP, ref.id)
         lp.addRule(RelativeLayout.ALIGN_BOTTOM, ref.id)
         return this
     }
 
-//    fun alignLeft(ref: BaseView): BaseView {
-//        ConsoleLogger.log(TAG, "%s alignLeft %s".format(this.tag, ref.tag))
-//        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-//        lp.addRule(RelativeLayout.ALIGN_LEFT, ref.id)
-//        return this
-//    }
+    fun alignLeft(ref: BaseView): BaseView {
+        ConsoleLogger.log(TAG, "%s alignLeft %s".format(this.tag, ref.tag))
+        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
+        lp.addRule(RelativeLayout.ALIGN_LEFT, ref.id)
+        return this
+    }
 
 }

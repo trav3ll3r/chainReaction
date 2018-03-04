@@ -74,9 +74,6 @@ class ChainView : BaseView {
                     else -> R.color.status_not_started
                 }
         )
-
-//        invalidate()
-//        requestLayout()
     }
 
     private fun startProgress(max: Long) {

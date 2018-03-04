@@ -45,10 +45,6 @@ abstract class AbcChain(override val reactor: Reactor)
         broadcastChainChanged("postMainTask")
     }
 
-    override fun runReactions() {
-        reactions.forEach { it.task.invoke(this) }
-    }
-
     override fun chainFinishing() {
         super.chainFinishing()
         ConsoleLogger.log("FireBroadcast chainFinishing %s".format(this::class.java.simpleName))
@@ -56,7 +52,6 @@ abstract class AbcChain(override val reactor: Reactor)
     }
 
     fun getSleepTime(): Long {
-
         return defaultSleep * sleepMultiplier
     }
 
@@ -119,6 +114,12 @@ class E1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(r
     @Suppress("PropertyName")
     override val TAG: String = E1Chain::class.java.simpleName
     override val taskResult = "E1"
+}
+
+class E2Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
+    @Suppress("PropertyName")
+    override val TAG: String = E2Chain::class.java.simpleName
+    override val taskResult = "E2"
 }
 
 class FChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {

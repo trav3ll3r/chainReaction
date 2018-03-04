@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="au.com.beba.chainReaction.MainActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
 
-    <Button
-        android:id="@+id/btn_test_non_blocking_ui"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test Serial Chain" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_test_error_phase3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Click while chain is running (UI non-blocking test)"
-        android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/btn_test_non_blocking_ui" />
+        <Button
+            android:id="@+id/btn_static_mixed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Static Mixed"
+            />
 
-    <Button
-        android:id="@+id/btn_visualise_chain"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Visualise Chain"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        <Button
+            android:id="@+id/btn_add_serial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add serial via reaction"
+            />
 
-</android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>

@@ -63,7 +63,7 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_visualise_chain)
 
         find<Button>(R.id.btn_show_test).setOnClickListener { visualise() }
-        find<Button>(R.id.btn_clear).setOnClickListener { clearChain() }
+        find<Button>(R.id.btn_reset_all).setOnClickListener { resetAll() }
         find<Button>(R.id.btn_start_test).setOnClickListener { executeChain() }
         canvas = find(R.id.chain_canvas)
 
@@ -79,30 +79,29 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
     }
 
     private fun visualise() {
-        clearChain()
+        resetAll()
         topChain = buildChain()
 
         drawChain(topChain!!, null)
     }
 
     private fun executeChain() {
-        if (topChain != null) {
-            registerListener()
-
-            //val executionStrategy: ExecutorService = Executors.newSingleThreadExecutor()
-            val chainExecutor: ExecutorService = Executors.newFixedThreadPool(10)
-
-            ConsoleLogger.log("", "begin --> \"topChain\"")
-
-            topChain!!.setParentCallback(object : ChainCallback<Chain> {
-                override fun onDone(completedChain: Chain) {
-                    //DO SOMETHING ONCE ENTIRE CHAIN-REACTION HAS COMPLETED (SUCCESS / ERROR)
-                    ConsoleLogger.log("", "done --> \"topChain\"")
-                }
-            })
-
-            chainExecutor.submit(topChain)
+        if (topChain == null) {
+            topChain = buildChain()
         }
+
+        registerListener()
+
+        val chainExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+
+        ConsoleLogger.log("start", "topChain")
+        topChain!!.setParentCallback(object : ChainCallback<Chain> {
+            override fun onDone(completedChain: Chain) {
+                //DO SOMETHING ONCE ENTIRE CHAIN-REACTION HAS COMPLETED (SUCCESS / ERROR)
+                ConsoleLogger.log("", "done --> \"topChain\"")
+            }
+        })
+        chainExecutor.submit(topChain)
     }
 
     private var receiverRegistered: AtomicBoolean = AtomicBoolean(false)
@@ -137,8 +136,7 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         return newAnchor
     }
 
-    private fun placeChainView(chain: Chain, parent: Chain?): BaseView {
-
+    private fun placeChainView(chain: Chain, parent: Chain?): ChainView {
         // CONFIGURE ChainView
         val abcChain = chain as AbcChain
         val view = buildChainView(this, abcChain)
@@ -166,46 +164,55 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
 
         val firstChild = parentChain?.getChainLinks()?.firstOrNull()
 
-        // PLACE SERIAL PreChain
+        val previousSibling = findChildBefore(parentChain, currentChain)
+        var previousSiblingView: BaseView? = null
+        if (previousSibling != null) {
+            previousSiblingView = findReferenceView(previousSibling)
+        }
+
+        var refView = ref
+        // BUILD AND PLACE (SERIAL) PRE-Connector
         if (parentChain != null) {
             if (executionStrategy == ExecutionStrategy.SERIAL) {
-                if (firstChild != currentChain) {
-                    val preConnectorView = buildChainPreConnector(this, currentChain, parentChain)
-                    if (preConnectorView != null) {
-                        val previousSibling = findChildBefore(parentChain, currentChain)
-                        if (previousSibling != null) {
-                            val previousSiblingView: BaseView? = findReferenceView(previousSibling)
-                            if (previousSiblingView != null) {
-                                preConnectorView
-                                        .below(previousSiblingView)
-//                                        .above(currentChainView)
-//                                        .above(getBottomReference()!!)
-                                        .toBottomOf(getBottomReference()!!)
-                                        .rightOf(ref!!)
-                                        .asWideAs(currentChainView)
-                                canvas.addView(preConnectorView)
-                                setBottomReference(preConnectorView)
-                            }
-                        }
+                val preConnectorView = buildChainPreConnector(this, currentChain, parentChain)
+                if (preConnectorView != null) {
+                    //if (previousSibling != null) {
+                        if (previousSiblingView != null) {
+                            preConnectorView
+                                    .below(previousSiblingView)
+                                    .toBottomOf(getBottomReference()!!)
+                                    .rightOf(refView!!)
+                                    .asWideAs(currentChainView)
+                            canvas.addView(preConnectorView)
+                            setBottomReference(preConnectorView)
+                        //}
+                    } else {
+                        preConnectorView.rightOf(refView!!).asHighAs(refView)
+                        canvas.addView(preConnectorView)
+                        refView = preConnectorView
                     }
                 }
             }
         }
 
         // PLACE ChainView
-        if (ref == null) {
+        if (refView == null) {
             currentChainView.topLeftParent()
         } else {
             when (executionStrategy) {
                 ExecutionStrategy.SERIAL -> {
                     if (firstChild == currentChain) {
-                        currentChainView.rightOf(ref).asHighAs(ref)
+                        currentChainView.rightOf(refView).asHighAs(refView)
                     } else {
-                        currentChainView.below(getBottomReference()!!).rightOf(ref)
+                        if (previousSiblingView != null) {
+                            currentChainView.below(getBottomReference()!!).alignLeft(previousSiblingView)
+                        } else {
+                            currentChainView.below(getBottomReference()!!).rightOf(refView)
+                        }
                     }
                 }
                 ExecutionStrategy.PARALLEL -> {
-                    currentChainView.below(getBottomReference()!!).rightOf(ref)
+                    currentChainView.below(getBottomReference()!!).rightOf(refView)
                 }
             }
         }
@@ -213,15 +220,17 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         setBottomReference(currentChainView)
 
         // BUILD AND PLACE POST-Connector
-        val connectorView = buildConnector(currentChainView, currentChain)
-        if (connectorView != null) {
-            // ADD Connector
-            connectorView.rightOf(currentChainView).asHighAs(currentChainView)
-            canvas.addView(connectorView)
-            setBottomReference(connectorView)
-        }
+//        if (currentChain.reactor.executionStrategy == ExecutionStrategy.PARALLEL) {
+//            val connectorView = buildConnector(currentChainView, currentChain)
+//            if (connectorView != null) {
+//                // ADD Connector
+//                connectorView.rightOf(currentChainView).asHighAs(currentChainView)
+//                canvas.addView(connectorView)
+//                setBottomReference(connectorView)
+//            }
+//        }
 
-        // BUILD AND PLACE PRE-Connector
+        // BUILD AND PLACE (PARALLEL) PRE-Connector
         if (executionStrategy == ExecutionStrategy.PARALLEL) {
             val preConnectorView = buildChainPreConnector(this, currentChain, parentChain)
             if (preConnectorView != null) {
@@ -249,8 +258,14 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
     private fun updateChainView(chain: Chain?) {
         if (chain is AbcChain) {
             val baseView = getChainViewByTag(canvas, buildChainTag(chain))
-            if (baseView is ChainView) {
-                baseView.update(chain)
+            if (baseView == null) {
+                val parent = findChildParent(chain, topChain!!)
+                val newBaseView: ChainView = placeChainView(chain, parent)
+                newBaseView.update(chain)
+            } else {
+                if (baseView is ChainView) {
+                    baseView.update(chain)
+                }
             }
         }
     }
@@ -269,7 +284,8 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         return result
     }
 
-    private fun clearChain() {
+    private fun resetAll() {
+        topChain = null
         setBottomReference(null)
         canvas.removeAllViews()
     }
