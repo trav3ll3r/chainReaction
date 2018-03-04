@@ -53,7 +53,16 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         preMainTaskPhase()
         mainTaskPhase()
         postMainTaskPhase()
-        linksPhase()
+
+        // LINKS OR REACTIONS PHASE
+        when (getChainLinks().size) {
+            0 -> {
+                ConsoleLogger.log(TAG, "has no sub-chains")
+                reactionsPhase()
+            }
+            else -> linksPhase()
+        }
+
         ConsoleLogger.log(TAG, "%s END".format(this::class.java.simpleName))
         return getChainResult()
     }
@@ -116,21 +125,8 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
         val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
 
         if (notStartedLinks.isNotEmpty()) {
-            runNonStartedLinks()
-        } else {
-            ConsoleLogger.log(TAG, "has no sub-chains")
-            reactionsPhase()
-        }
-    }
-
-    private fun runNonStartedLinks() {
-        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
-
-        if (notStartedLinks.isNotEmpty()) {
             ConsoleLogger.log(TAG, "is starting [%s] sub-chains".format(notStartedLinks.size))
-            //if (completionService == null) {
             initExecutor()
-            //}
 
             notStartedLinks.forEach {
                 ConsoleLogger.log(TAG, "is submitting [%s]".format(it::class.java.simpleName))
@@ -189,8 +185,8 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
                     // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
                     ConsoleLogger.log(TAG, "waiting for all results, decision pending")
                 } else {
-                    // START NOT_STARTED LINKS
-                    runNonStartedLinks()
+                    // RUN LINKS PHASE
+                    linksPhase()
                 }
             }
         }
