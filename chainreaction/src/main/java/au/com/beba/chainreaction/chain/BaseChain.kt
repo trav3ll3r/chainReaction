@@ -13,16 +13,16 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     @Suppress("PropertyName")
     override val TAG: String = BaseChain::class.java.simpleName
 
-    //    private var linksExecutionStrategy: ExecutionStrategy = ExecutionStrategy.SERIAL
     private val links: MutableList<Chain> = mutableListOf()
     private val chainReactions: MutableList<Reaction> = mutableListOf()
     override val reactions: MutableList<Reaction>
         get() = chainReactions
 
     private lateinit var parentChainCallback: ChainCallback<Chain>
+    private var completionService: ExecutorCompletionService<Any?>? = null
 
     init {
-        addReaction(Reaction("LOGGER", {
+        addReaction(Reaction("LOGGER", { _, _ ->
             ConsoleLogger.log(TAG, "{%s} %s result=%s".format("REACTION", "LOGGER", getChainResult()))
         }))
     }
@@ -113,27 +113,35 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 
     private fun linksPhase() {
         ConsoleLogger.log(TAG, "linksPhase")
+        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
 
-        if (links.isNotEmpty()) {
-            ConsoleLogger.log(TAG, "is starting [%s] sub-chains".format(links.size))
-            val internalExecutor: ExecutorService = when (reactor.executionStrategy) {
-                ExecutionStrategy.SERIAL -> Executors.newSingleThreadExecutor()
-                ExecutionStrategy.PARALLEL -> Executors.newCachedThreadPool()
-            }
-            val completionService: ExecutorCompletionService<Any?> = ExecutorCompletionService(internalExecutor)
-
-            links.forEach {
-                ConsoleLogger.log(TAG, "is submitting [%s]".format(it::class.java.simpleName))
-                completionService.submit(it)
-            }
-
-            links.forEach {
-                val future = completionService.take()
-                future.get()
-            }
+        if (notStartedLinks.isNotEmpty()) {
+            runNonStartedLinks()
         } else {
             ConsoleLogger.log(TAG, "has no sub-chains")
             reactionsPhase()
+        }
+    }
+
+    private fun runNonStartedLinks() {
+        val notStartedLinks = links.filter { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
+
+        if (notStartedLinks.isNotEmpty()) {
+            ConsoleLogger.log(TAG, "is starting [%s] sub-chains".format(notStartedLinks.size))
+            //if (completionService == null) {
+            initExecutor()
+            //}
+
+            notStartedLinks.forEach {
+                ConsoleLogger.log(TAG, "is submitting [%s]".format(it::class.java.simpleName))
+                it.setChainStatus(ChainCallback.Status.QUEUED)
+                completionService!!.submit(it)
+            }
+
+            notStartedLinks.forEach {
+                val future = completionService!!.take()
+                future.get()
+            }
         }
     }
 
@@ -150,7 +158,12 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     }
 
     override fun runReactions() {
-        reactions.forEach { it.task.invoke(this) }
+        reactions.forEach {
+            if (!it.skip) {
+                ConsoleLogger.log(TAG, "{%s} %s".format("REACTION", it.type))
+                it.task.invoke(this, it)
+            }
+        }
     }
 
     /* ************** */
@@ -159,6 +172,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
     private fun decisionPhase() {
         ConsoleLogger.log(TAG, "decisionPhase")
         val incompleteLinks = links.count { it.getChainStatus() !in listOf(ChainCallback.Status.SUCCESS, ChainCallback.Status.ERROR) }
+        val notStartedLinks = links.count { it.getChainStatus() in listOf(ChainCallback.Status.NOT_STARTED) }
         ConsoleLogger.log(TAG, "decisionPhase links[%s] incomplete[%s]".format(links.size, incompleteLinks))
 
         if (links.isEmpty()) {
@@ -171,8 +185,13 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
                 ConsoleLogger.log(TAG, "received all results, decision done")
                 finishPhase()
             } else {
-                // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
-                ConsoleLogger.log(TAG, "waiting for all results, decision pending")
+                if (notStartedLinks == 0) {
+                    // ALL LINKS IN_PROGRESS BUT SOME STILL MISSING RESULT (WAITING FOR ALL Chain Links TO OBTAIN RESULT)
+                    ConsoleLogger.log(TAG, "waiting for all results, decision pending")
+                } else {
+                    // START NOT_STARTED LINKS
+                    runNonStartedLinks()
+                }
             }
         }
     }
@@ -217,5 +236,13 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 
     override fun chainFinishing() {
         ConsoleLogger.log(TAG, "chainFinishing")
+    }
+
+    private fun initExecutor() {
+        val internalExecutor: ExecutorService = when (reactor.executionStrategy) {
+            ExecutionStrategy.SERIAL -> Executors.newSingleThreadExecutor()
+            ExecutionStrategy.PARALLEL -> Executors.newCachedThreadPool()
+        }
+        completionService = ExecutorCompletionService(internalExecutor)
     }
 }
