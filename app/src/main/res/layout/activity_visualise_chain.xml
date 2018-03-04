@@ -11,6 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/btn_show"
+        android:textAllCaps="false"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/btn_reset_all"
         app:layout_constraintVertical_chainStyle="packed" />
@@ -20,6 +21,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/btn_reset_all"
+        android:textAllCaps="false"
         android:visibility="visible"
         app:layout_constraintLeft_toRightOf="@id/btn_show_test"
         app:layout_constraintRight_toLeftOf="@+id/btn_start_test"
@@ -31,6 +33,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/btn_start"
+        android:textAllCaps="false"
         android:visibility="visible"
         app:layout_constraintLeft_toRightOf="@id/btn_reset_all"
         app:layout_constraintRight_toRightOf="parent"
