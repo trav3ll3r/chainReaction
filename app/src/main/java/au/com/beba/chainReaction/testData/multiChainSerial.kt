@@ -124,6 +124,6 @@ class E1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(r
 class FChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = FChain::class.java.simpleName
-    override val taskResult = "F1"
+    override val taskResult = "F"
 }
 

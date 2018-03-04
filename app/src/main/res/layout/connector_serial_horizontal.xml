@@ -28,6 +28,7 @@
         app:layout_constraintRight_toRightOf="@id/middle_vertical"
         android:contentDescription="@null"
         android:background="@android:color/white"
+        android:visibility="gone"
         />
 
 </android.support.constraint.ConstraintLayout>
