@@ -27,8 +27,9 @@ class ChainView : BaseView {
 
     private lateinit var chainDuration: TextView
     private lateinit var chainName: TextView
+    private lateinit var cardView: View
+    private lateinit var innerContent: ConstraintLayout
     private lateinit var chainProgress: View
-    private lateinit var innerContent: View
 
     @JvmOverloads
     constructor(
@@ -52,6 +53,7 @@ class ChainView : BaseView {
         this.chainDuration = find(R.id.execution_duration)
         this.chainName = find(R.id.chain_name)
         this.chainProgress = find(R.id.chain_progress)
+        this.cardView = find(R.id.card_view)
         this.innerContent = find(R.id.inner_content)
     }
 
@@ -77,21 +79,18 @@ class ChainView : BaseView {
     }
 
     private fun startProgress(max: Long) {
+        val animateInside: ConstraintLayout = this.innerContent    //myLayout
         val changeBounds = ChangeBounds()
         changeBounds.duration = max
         changeBounds.interpolator = LinearInterpolator()
 
-        TransitionManager.beginDelayedTransition(myLayout, changeBounds)
+        TransitionManager.beginDelayedTransition(animateInside, changeBounds)
 
         // ANIMATE TO NEW CONSTRAINTS
         val set = ConstraintSet()
-//        set.connect(R.id.chain_progress, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
-//        set.connect(R.id.chain_progress, ConstraintSet.TOP, innerContent.id, ConstraintSet.TOP)
-//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, innerContent.id, ConstraintSet.BOTTOM)
-        set.connect(R.id.chain_progress, ConstraintSet.LEFT, R.id.start_content, ConstraintSet.LEFT)
-        set.connect(R.id.chain_progress, ConstraintSet.RIGHT, R.id.end_content, ConstraintSet.RIGHT)
-
-        set.applyTo(myLayout)
+        set.clone(animateInside)
+        set.connect(R.id.chain_progress, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT)
+        set.connect(R.id.chain_progress, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT)
+        set.applyTo(animateInside)
     }
 }
