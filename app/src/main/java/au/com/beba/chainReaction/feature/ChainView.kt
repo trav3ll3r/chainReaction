@@ -14,6 +14,7 @@ import android.widget.TextView
 import au.com.beba.chainReaction.R
 import au.com.beba.chainReaction.testData.AbcChain
 import au.com.beba.chainreaction.chain.ChainCallback
+import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.find
 
@@ -66,7 +67,7 @@ class ChainView : BaseView {
         chainProgress.backgroundColor = resources.getColor(
                 when (chain.getChainStatus()) {
                     ChainCallback.Status.IN_PROGRESS, ChainCallback.Status.QUEUED -> {
-                        startProgress(chain.getSleepTime())
+                        animateProgress(chain.getSleepTime())
                         R.color.status_in_progress
                     }
                     ChainCallback.Status.SUCCESS -> {
@@ -78,19 +79,25 @@ class ChainView : BaseView {
         )
     }
 
-    private fun startProgress(max: Long) {
-        val animateInside: ConstraintLayout = this.innerContent    //myLayout
-        val changeBounds = ChangeBounds()
-        changeBounds.duration = max
-        changeBounds.interpolator = LinearInterpolator()
+    private fun animateProgress(max: Long) {
+        ConsoleLogger.log(tag, "animateProgress")
 
-        TransitionManager.beginDelayedTransition(animateInside, changeBounds)
+        val r = Runnable {
+            val animateInside: ConstraintLayout = this.innerContent    //myLayout
+            val changeBounds = ChangeBounds()
+            changeBounds.duration = max
+            changeBounds.interpolator = LinearInterpolator()
 
-        // ANIMATE TO NEW CONSTRAINTS
-        val set = ConstraintSet()
-        set.clone(animateInside)
-        set.connect(R.id.chain_progress, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT)
-        set.connect(R.id.chain_progress, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT)
-        set.applyTo(animateInside)
+            TransitionManager.beginDelayedTransition(animateInside, changeBounds)
+
+            // ANIMATE TO NEW CONSTRAINTS
+            val set = ConstraintSet()
+            set.clone(animateInside)
+            set.connect(R.id.chain_progress, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT)
+            set.connect(R.id.chain_progress, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT)
+            set.applyTo(animateInside)
+        }
+
+        post(r)
     }
 }

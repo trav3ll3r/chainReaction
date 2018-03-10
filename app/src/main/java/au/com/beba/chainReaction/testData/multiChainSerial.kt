@@ -80,6 +80,12 @@ class B1Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(r
     override val taskResult = "B1"
 }
 
+class B2Chain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
+    @Suppress("PropertyName")
+    override val TAG: String = B2Chain::class.java.simpleName
+    override val taskResult = "B2"
+}
+
 class CChain(override val reactor: Reactor = PassThroughReactor()) : AbcChain(reactor) {
     @Suppress("PropertyName")
     override val TAG: String = CChain::class.java.simpleName
