@@ -4,12 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
-import au.com.beba.chainReaction.testData.*
-import au.com.beba.chainreaction.chain.Chain
-import au.com.beba.chainreaction.chain.ChainCallback
-import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.find
-import java.util.concurrent.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
         find<Button>(R.id.btn_static_mixed).setOnClickListener { staticMixed() }
         find<Button>(R.id.btn_add_serial).setOnClickListener { addSerial() }
+        find<Button>(R.id.btn_multi_parallel).setOnClickListener { multiParallel() }
     }
 
     private fun staticMixed() {
@@ -28,6 +24,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun addSerial() {
         val intent = Intent(this, AddSerialToChainActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun multiParallel() {
+        val intent = Intent(this, MultiParallelChainActivity::class.java)
         startActivity(intent)
     }
 

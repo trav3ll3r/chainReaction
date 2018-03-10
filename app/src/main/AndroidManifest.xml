@@ -22,6 +22,7 @@
         <activity android:name=".StaticMixedChainActivity"/>
 
         <activity android:name=".AddSerialToChainActivity"/>
+        <activity android:name=".MultiParallelChainActivity" />
     </application>
 
 </manifest>

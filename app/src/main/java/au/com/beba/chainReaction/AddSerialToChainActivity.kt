@@ -16,31 +16,23 @@ class AddSerialToChainActivity : BaseVisualChainActivity() {
 
         val a = AChain(serialReactor)
         val b = BChain(serialReactor)
-        b.addToChain(B1Chain(serialReactor))
-
-        val c1 = C1Chain(serialReactor)
-        c1.sleepMultiplier = 2
+        val b1 = B1Chain(serialReactor)
         val c = CChain(parallelReactor)
-                .addToChain(c1, C2Chain(serialReactor))
-        val d = DChain(serialReactor)
 
-        val e1 = E1Chain(serialReactor)
-                e1.addReaction(Reaction("NEW_LINK", { chain, r ->
-                    ConsoleLogger.log("REACTION", "Add link E2 to %s".format(chain::class.java.simpleName))
-                    chain.addToChain(E2Chain(chain.reactor))
-                    r.skip = true
-                })
-                )
-        val e = EChain(serialReactor)
-                .addToChain(e1)
-        val f = FChain(serialReactor)
+        b1.addReaction(
+                Reaction(
+                        "NEW_LINK",
+                        { chain, r ->
+                            ConsoleLogger.log("REACTION", "Add link B2 to %s".format(chain::class.java.simpleName))
+                            chain.addToChain(B2Chain(chain.reactor))
+                            r.skip = true
+                        })
+        )
+
         return a
                 .addToChain(
-                b
-               ,c
-               ,d
-               ,e
-               ,f
-        )
+                        b.addToChain(b1),
+                        c
+                )
     }
 }

@@ -24,6 +24,13 @@
             android:text="Add serial via reaction"
             />
 
+        <Button
+            android:id="@+id/btn_multi_parallel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multi-parallel chain"
+            />
+
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>
