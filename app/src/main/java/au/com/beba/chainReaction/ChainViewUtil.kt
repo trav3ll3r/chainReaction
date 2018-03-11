@@ -73,12 +73,37 @@ fun findChildParent(child: Chain, haystack: Chain): Chain? {
     return result
 }
 
+fun determineConnectorType(currentChain: Chain, parentChain: Chain): ConnectorView.Type {
+    return if (parentChain.getChainLinks().size == 1) {
+        ConnectorView.Type.ONLY_CHILD
+    } else {
+        when {
+            isFirstChild(currentChain, parentChain) -> ConnectorView.Type.FIRST_CHILD
+            isLastChild(currentChain, parentChain) -> ConnectorView.Type.LAST_CHILD
+            else -> ConnectorView.Type.MIDDLE_CHILD
+        }
+    }
+}
+
+fun isFirstChild(currentChain: Chain, parentChain: Chain?): Boolean {
+    return currentChain == parentChain?.getChainLinks()?.firstOrNull()
+}
+
+private fun isLastChild(currentChain: Chain, parentChain: Chain): Boolean {
+    val links = parentChain.getChainLinks()
+    if (links.isNotEmpty()) {
+        val lastLink = links[links.size - 1]
+        return currentChain == lastLink
+    }
+    return false
+}
+
 fun buildChainTag(chain: Chain): String {
     return chain::class.java.simpleName
 }
 
-fun buildChainConnectorTag(chain: Chain, prefix: String = "post"): String {
-    return "%s:%s%s".format(chain::class.java.simpleName, prefix, "connector")
+fun buildChainConnectorTag(chain: Chain): String {
+    return "%s-%s".format(chain::class.java.simpleName, "connector")
 }
 
 private val nextGeneratedId = AtomicInteger(1)
@@ -104,59 +129,16 @@ fun buildChainView(context: Context, chain: AbcChain): ChainView {
     return view
 }
 
-fun buildChainConnector(context: Context, chain: Chain): ConnectorView? {
-    var view: ConnectorView? = null
-    var connectorType: ConnectorView.Type
-
-    if (chain.getChainLinks().isNotEmpty()) {
-        connectorType = ConnectorView.Type.SERIAL_CHILD
-        if (chain.reactor.executionStrategy == ExecutionStrategy.PARALLEL) {
-            connectorType = ConnectorView.Type.PARALLEL_PARENT
+fun connectorFactory(context: Context, chain: Chain?, connectorType: ConnectorView.Type, executionStrategy: ExecutionStrategy): ConnectorView {
+    val view = ConnectorView(context, null, 0, connectorType, executionStrategy)
+    view.id = generateViewId()
+    view.layoutParams = RelativeLayout.LayoutParams(
+            context.resources.getDimensionPixelSize(R.dimen.connector_width),
+            context.resources.getDimensionPixelSize(R.dimen.chain_height))
+    if (chain != null) {
+        view.tag = when (chain) { null -> ""
+            else -> buildChainConnectorTag(chain)
         }
-
-        view = ConnectorView(context, null, 0, connectorType)
-        view.id = generateViewId()
-        view.layoutParams = RelativeLayout.LayoutParams(context.resources.getDimensionPixelSize(R.dimen.connector_width), RelativeLayout.LayoutParams.WRAP_CONTENT)
-        view.tag = buildChainConnectorTag(chain)
     }
-
-    return view
-}
-
-fun buildChainPreConnector(context: Context, chain: Chain, parentChain: Chain?): ConnectorView? {
-    var view: ConnectorView? = null
-    var connectorType: ConnectorView.Type
-
-    if (parentChain != null) {
-
-        val firstChild = parentChain.getChainLinks().firstOrNull()
-
-        when (parentChain.reactor.executionStrategy) {
-            ExecutionStrategy.PARALLEL -> {
-                val links = parentChain.getChainLinks()
-                val lastChild = links[links.lastIndex] == chain
-
-                connectorType = ConnectorView.Type.PARALLEL_MIDDLE
-                if (lastChild) {
-                    connectorType = ConnectorView.Type.PARALLEL_LAST
-                }
-            }
-
-            ExecutionStrategy.SERIAL -> {
-                if (firstChild == chain) {
-                    connectorType = ConnectorView.Type.SERIAL_CHILD
-                }
-                else {
-                    connectorType = ConnectorView.Type.SERIAL_SIBLING
-                }
-            }
-        }
-
-        view = ConnectorView(context, null, 0, connectorType)
-        view.id = generateViewId()
-        view.layoutParams = RelativeLayout.LayoutParams(context.resources.getDimensionPixelSize(R.dimen.connector_width), RelativeLayout.LayoutParams.WRAP_CONTENT)
-        view.tag = buildChainConnectorTag(chain, "pre")
-    }
-
     return view
 }

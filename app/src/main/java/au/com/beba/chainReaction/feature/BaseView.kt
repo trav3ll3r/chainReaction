@@ -10,11 +10,8 @@ abstract class BaseView
 constructor(context: Context, attrs: AttributeSet?, defStyle: Int)
     : ConstraintLayout(context, attrs, defStyle) {
 
+    @Suppress("PrivatePropertyName")
     private val TAG = BaseView::class.java.simpleName
-
-    var columnId: Int = 1
-
-//    protected abstract fun init()
 
     fun topLeftParent(): BaseView {
         ConsoleLogger.log(TAG, "%s topLeftParent".format(this.tag))
@@ -38,8 +35,8 @@ constructor(context: Context, attrs: AttributeSet?, defStyle: Int)
         return this
     }
 
-    fun asHighAs(ref: BaseView): BaseView {
-        ConsoleLogger.log(TAG, "%s asHighAs %s".format(this.tag, ref.tag))
+    fun alignTopAndBottomWith(ref: BaseView): BaseView {
+        ConsoleLogger.log(TAG, "%s alignTopAndBottomWith %s".format(this.tag, ref.tag))
         val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
         lp.addRule(RelativeLayout.ALIGN_TOP, ref.id)
         lp.addRule(RelativeLayout.ALIGN_BOTTOM, ref.id)
@@ -54,32 +51,10 @@ constructor(context: Context, attrs: AttributeSet?, defStyle: Int)
         return this
     }
 
-    fun leftOf(ref: BaseView): BaseView {
-        ConsoleLogger.log(TAG, "%s leftOf %s".format(this.tag, ref.tag))
+    fun above(ref: BaseView): BaseView {
+        ConsoleLogger.log(TAG, "%s above %s".format(this.tag, ref.tag))
         val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-        lp.addRule(RelativeLayout.LEFT_OF, ref.id)
+        lp.addRule(RelativeLayout.ABOVE, ref.id)
         return this
     }
-
-//    fun above(ref: BaseView): BaseView {
-//        ConsoleLogger.log(TAG, "%s above %s".format(this.tag, ref.tag))
-//        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-//        lp.addRule(RelativeLayout.ABOVE, ref.id)
-//        return this
-//    }
-
-    fun toBottomOf(ref: BaseView): BaseView {
-        ConsoleLogger.log(TAG, "%s toBottomOf %s".format(this.tag, ref.tag))
-        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-        lp.addRule(RelativeLayout.ALIGN_BOTTOM, ref.id)
-        return this
-    }
-
-    fun alignLeft(ref: BaseView): BaseView {
-        ConsoleLogger.log(TAG, "%s alignLeft %s".format(this.tag, ref.tag))
-        val lp: RelativeLayout.LayoutParams = this.layoutParams as RelativeLayout.LayoutParams
-        lp.addRule(RelativeLayout.ALIGN_LEFT, ref.id)
-        return this
-    }
-
 }
