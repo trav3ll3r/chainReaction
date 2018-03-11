@@ -4,9 +4,9 @@ import au.com.beba.chainReaction.testData.*
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ExecutionStrategy
 
-class VisualiseChainActivity : BaseVisualChainActivity() {
+class StaticMixedChainActivity : BaseVisualChainActivity() {
 
-    override val tag: String = VisualiseChainActivity::class.java.simpleName
+    override val tag: String = StaticMixedChainActivity::class.java.simpleName
 
     override fun buildChain(): Chain {
         val serialReactor = ReactorWithBroadcastIml(this, ExecutionStrategy.SERIAL)

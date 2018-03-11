@@ -4,26 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minHeight="20dp"
     >
 
     <include layout="@layout/four_quarters_guidelines"/>
 
     <View
-        android:layout_width="0dp"
-        android:layout_height="@dimen/connection_thickness"
-        android:background="@color/status_border"
-        app:layout_constraintTop_toTopOf="@id/middle_horizontal"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="@id/middle_vertical"
-        />
-
-    <View
         android:layout_width="@dimen/connection_thickness"
         android:layout_height="0dp"
         android:background="@color/status_border"
-        app:layout_constraintTop_toTopOf="@id/middle_horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/middle_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
 </android.support.constraint.ConstraintLayout>

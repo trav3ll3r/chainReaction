@@ -17,6 +17,15 @@
         app:layout_constraintRight_toRightOf="parent"
         />
 
+    <View
+        android:layout_width="@dimen/connection_thickness"
+        android:layout_height="0dp"
+        android:background="@color/status_border"
+        app:layout_constraintTop_toTopOf="@id/middle_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/middle_vertical"
+        />
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"

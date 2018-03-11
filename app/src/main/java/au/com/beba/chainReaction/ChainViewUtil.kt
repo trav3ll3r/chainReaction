@@ -40,12 +40,70 @@ fun findInChain(needle: String, chain: Chain): Chain? {
     return result
 }
 
+fun findChildBefore(parent: Chain?, beforeSibling: Chain): Chain? {
+    if (parent != null) {
+        var previousSibling: Chain? = null
+        for (currentSibling in parent.getChainLinks()) {
+            if (currentSibling == beforeSibling) {
+                return previousSibling
+            }
+            previousSibling = currentSibling
+        }
+    }
+    return null
+}
+
+fun findChildParent(child: Chain, haystack: Chain): Chain? {
+    var result: Chain? = null
+
+    if (haystack.getChainLinks().contains(child)) {
+        result = haystack
+    } else {
+        val children = haystack.getChainLinks().size
+        if (children > 0) {
+            (0 until children).forEach {
+                val interim = findChildParent(child, haystack.getChainLinks()[it])
+                if (interim != null) {
+                    result = interim
+                    return@forEach
+                }
+            }
+        }
+    }
+    return result
+}
+
+fun determineConnectorType(currentChain: Chain, parentChain: Chain): ConnectorView.Type {
+    return if (parentChain.getChainLinks().size == 1) {
+        ConnectorView.Type.ONLY_CHILD
+    } else {
+        when {
+            isFirstChild(currentChain, parentChain) -> ConnectorView.Type.FIRST_CHILD
+            isLastChild(currentChain, parentChain) -> ConnectorView.Type.LAST_CHILD
+            else -> ConnectorView.Type.MIDDLE_CHILD
+        }
+    }
+}
+
+fun isFirstChild(currentChain: Chain, parentChain: Chain?): Boolean {
+    return currentChain == parentChain?.getChainLinks()?.firstOrNull()
+}
+
+private fun isLastChild(currentChain: Chain, parentChain: Chain): Boolean {
+    val links = parentChain.getChainLinks()
+    if (links.isNotEmpty()) {
+        val lastLink = links[links.size - 1]
+        return currentChain == lastLink
+    }
+    return false
+}
+
 fun buildChainTag(chain: Chain): String {
     return chain::class.java.simpleName
 }
 
-fun buildChainConnectorTag(chain: Chain, prefix: String = "post"): String {
-    return "%s:%s%s".format(chain::class.java.simpleName, prefix, "connector")
+fun buildChainConnectorTag(chain: Chain): String {
+    return "%s-%s".format(chain::class.java.simpleName, "connector")
 }
 
 private val nextGeneratedId = AtomicInteger(1)
@@ -71,46 +129,16 @@ fun buildChainView(context: Context, chain: AbcChain): ChainView {
     return view
 }
 
-fun buildChainConnector(context: Context, chain: Chain): ConnectorView? {
-    var view: ConnectorView? = null
-    var connectorType: ConnectorView.Type
-
-    if (chain.getChainLinks().isNotEmpty()) {
-        connectorType = ConnectorView.Type.SERIAL
-        if (chain.reactor.executionStrategy == ExecutionStrategy.PARALLEL) {
-            connectorType = ConnectorView.Type.PARALLEL_PARENT
-        }
-
-        view = ConnectorView(context, null, 0, connectorType)
-        view.id = generateViewId()
-        view.layoutParams = RelativeLayout.LayoutParams(context.resources.getDimensionPixelSize(R.dimen.connector_width), RelativeLayout.LayoutParams.WRAP_CONTENT)
-        view.tag = buildChainConnectorTag(chain)
-    }
-
-    return view
-}
-
-fun buildChainPreConnector(context: Context, chain: Chain, parentChain: Chain?): ConnectorView? {
-    var view: ConnectorView? = null
-    var connectorType: ConnectorView.Type
-
-    if (parentChain != null) {
-        if (parentChain.reactor.executionStrategy == ExecutionStrategy.PARALLEL) {
-
-            val links = parentChain.getChainLinks()
-            val lastChild = links[links.lastIndex] == chain
-
-            connectorType = ConnectorView.Type.PARALLEL_MIDDLE
-            if (lastChild) {
-                connectorType = ConnectorView.Type.PARALLEL_LAST
-            }
-
-            view = ConnectorView(context, null, 0, connectorType)
-            view.id = generateViewId()
-            view.layoutParams = RelativeLayout.LayoutParams(context.resources.getDimensionPixelSize(R.dimen.connector_width), RelativeLayout.LayoutParams.WRAP_CONTENT)
-            view.tag = buildChainConnectorTag(chain, "pre")
+fun connectorFactory(context: Context, chain: Chain?, connectorType: ConnectorView.Type, executionStrategy: ExecutionStrategy): ConnectorView {
+    val view = ConnectorView(context, null, 0, connectorType, executionStrategy)
+    view.id = generateViewId()
+    view.layoutParams = RelativeLayout.LayoutParams(
+            context.resources.getDimensionPixelSize(R.dimen.connector_width),
+            context.resources.getDimensionPixelSize(R.dimen.chain_height))
+    if (chain != null) {
+        view.tag = when (chain) { null -> ""
+            else -> buildChainConnectorTag(chain)
         }
     }
-
     return view
 }

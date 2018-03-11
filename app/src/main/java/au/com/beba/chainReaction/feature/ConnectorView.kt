@@ -3,15 +3,19 @@ package au.com.beba.chainReaction.feature
 import android.content.Context
 import android.util.AttributeSet
 import au.com.beba.chainReaction.R
+import au.com.beba.chainreaction.chain.ExecutionStrategy
 
-class ConnectorView(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, private val type: ConnectorView.Type = Type.SERIAL)
+class ConnectorView(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
+                    private val childType: ConnectorView.Type = Type.ONLY_CHILD,
+                    private val executionStrategy: ExecutionStrategy)
     : BaseView(context, attrs, defStyleAttr) {
 
     enum class Type {
-        SERIAL,
-        PARALLEL_PARENT,
-        PARALLEL_MIDDLE,
-        PARALLEL_LAST
+        ONLY_CHILD,
+        FIRST_CHILD,
+        MIDDLE_CHILD,
+        LAST_CHILD,
+        VERTICAL_PATCH
     }
 
     @JvmOverloads
@@ -19,7 +23,7 @@ class ConnectorView(context: Context, attrs: AttributeSet? = null, defStyleAttr:
             context: Context,
             attrs: AttributeSet? = null,
             defStyleAttr: Int = 0)
-            : this(context, attrs, defStyleAttr, Type.SERIAL)
+            : this(context, attrs, defStyleAttr, Type.ONLY_CHILD, ExecutionStrategy.SERIAL)
 
     init {
         inflateView()
@@ -27,11 +31,20 @@ class ConnectorView(context: Context, attrs: AttributeSet? = null, defStyleAttr:
 
     private fun inflateView() {
         inflate(context,
-                when (type) {
-                    Type.PARALLEL_PARENT -> R.layout.connector_parallel_parent
-                    Type.PARALLEL_MIDDLE -> R.layout.connector_parallel_middle
-                    Type.PARALLEL_LAST -> R.layout.connector_parallel_last
-                    else -> R.layout.connector_serial
+                when (childType) {
+                    Type.ONLY_CHILD -> R.layout.connector_serial_horizontal
+                    Type.LAST_CHILD -> R.layout.connector_last_child
+                    Type.FIRST_CHILD ->
+                        when (executionStrategy) {
+                            ExecutionStrategy.SERIAL -> R.layout.connector_first_serial
+                            ExecutionStrategy.PARALLEL -> R.layout.connector_first_parallel
+                        }
+                    Type.MIDDLE_CHILD ->
+                        when (executionStrategy) {
+                            ExecutionStrategy.SERIAL -> R.layout.connector_middle_serial
+                            ExecutionStrategy.PARALLEL -> R.layout.connector_middle_parallel
+                        }
+                    Type.VERTICAL_PATCH -> R.layout.connector_patch_vertical
                 },
                 this)
     }

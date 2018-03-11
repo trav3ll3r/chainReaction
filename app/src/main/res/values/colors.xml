@@ -8,6 +8,7 @@
     <color name="chainText">#1e1e1e</color>
 
     <color name="status_border">#333</color>
+    <color name="status_border_plan">#d6d6d6</color>
     <color name="status_not_started">#eee</color>
     <color name="status_in_progress">#b1af59</color>
     <color name="status_success">#7cb159</color>

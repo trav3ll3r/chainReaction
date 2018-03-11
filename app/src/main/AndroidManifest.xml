@@ -13,19 +13,16 @@
 
         <!-- LAUNCHER ACTIVITY -->
         <activity android:name=".MainActivity">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
-        <activity android:name=".VisualiseChainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".StaticMixedChainActivity"/>
+
+        <activity android:name=".AddSerialToChainActivity"/>
+        <activity android:name=".MultiParallelChainActivity" />
     </application>
 
 </manifest>

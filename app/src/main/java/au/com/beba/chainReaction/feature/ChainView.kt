@@ -14,6 +14,7 @@ import android.widget.TextView
 import au.com.beba.chainReaction.R
 import au.com.beba.chainReaction.testData.AbcChain
 import au.com.beba.chainreaction.chain.ChainCallback
+import au.com.beba.chainreaction.logger.ConsoleLogger
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.find
 
@@ -27,8 +28,9 @@ class ChainView : BaseView {
 
     private lateinit var chainDuration: TextView
     private lateinit var chainName: TextView
+    private lateinit var cardView: View
+    private lateinit var innerContent: ConstraintLayout
     private lateinit var chainProgress: View
-    private lateinit var innerContent: View
 
     @JvmOverloads
     constructor(
@@ -52,6 +54,7 @@ class ChainView : BaseView {
         this.chainDuration = find(R.id.execution_duration)
         this.chainName = find(R.id.chain_name)
         this.chainProgress = find(R.id.chain_progress)
+        this.cardView = find(R.id.card_view)
         this.innerContent = find(R.id.inner_content)
     }
 
@@ -64,7 +67,7 @@ class ChainView : BaseView {
         chainProgress.backgroundColor = resources.getColor(
                 when (chain.getChainStatus()) {
                     ChainCallback.Status.IN_PROGRESS, ChainCallback.Status.QUEUED -> {
-                        startProgress(chain.getSleepTime())
+                        animateProgress(chain.getSleepTime())
                         R.color.status_in_progress
                     }
                     ChainCallback.Status.SUCCESS -> {
@@ -74,27 +77,27 @@ class ChainView : BaseView {
                     else -> R.color.status_not_started
                 }
         )
-
-//        invalidate()
-//        requestLayout()
     }
 
-    private fun startProgress(max: Long) {
-        val changeBounds = ChangeBounds()
-        changeBounds.duration = max
-        changeBounds.interpolator = LinearInterpolator()
+    private fun animateProgress(max: Long) {
+        ConsoleLogger.log(tag, "animateProgress")
 
-        TransitionManager.beginDelayedTransition(myLayout, changeBounds)
+        val r = Runnable {
+            val animateInside: ConstraintLayout = this.innerContent    //myLayout
+            val changeBounds = ChangeBounds()
+            changeBounds.duration = max
+            changeBounds.interpolator = LinearInterpolator()
 
-        // ANIMATE TO NEW CONSTRAINTS
-        val set = ConstraintSet()
-//        set.connect(R.id.chain_progress, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
-//        set.connect(R.id.chain_progress, ConstraintSet.TOP, innerContent.id, ConstraintSet.TOP)
-//        set.connect(R.id.chain_progress, ConstraintSet.BOTTOM, innerContent.id, ConstraintSet.BOTTOM)
-        set.connect(R.id.chain_progress, ConstraintSet.LEFT, R.id.start_content, ConstraintSet.LEFT)
-        set.connect(R.id.chain_progress, ConstraintSet.RIGHT, R.id.end_content, ConstraintSet.RIGHT)
+            TransitionManager.beginDelayedTransition(animateInside, changeBounds)
 
-        set.applyTo(myLayout)
+            // ANIMATE TO NEW CONSTRAINTS
+            val set = ConstraintSet()
+            set.clone(animateInside)
+            set.connect(R.id.chain_progress, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT)
+            set.connect(R.id.chain_progress, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT)
+            set.applyTo(animateInside)
+        }
+
+        post(r)
     }
 }
