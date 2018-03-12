@@ -32,7 +32,7 @@ class ConnectorView(context: Context, attrs: AttributeSet? = null, defStyleAttr:
     private fun inflateView() {
         inflate(context,
                 when (childType) {
-                    Type.ONLY_CHILD -> R.layout.connector_serial_horizontal
+                    Type.ONLY_CHILD -> R.layout.connector_only_child
                     Type.LAST_CHILD -> R.layout.connector_last_child
                     Type.FIRST_CHILD ->
                         when (executionStrategy) {

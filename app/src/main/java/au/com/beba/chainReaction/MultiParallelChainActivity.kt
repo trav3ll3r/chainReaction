@@ -13,13 +13,21 @@ class MultiParallelChainActivity : BaseVisualChainActivity() {
 
         val a = AChain(parallelReactor)
         val b = BChain(parallelReactor)
-        b.addToChain(B1Chain(parallelReactor))
-        b.addToChain(B2Chain(parallelReactor))
+        b.addToChain(
+                B1Chain(parallelReactor),
+                B2Chain(parallelReactor),
+                B3Chain(parallelReactor)
+        )
 
         val c1 = C1Chain(parallelReactor)
         c1.sleepMultiplier = 2
         val c = CChain(parallelReactor)
-                .addToChain(c1, C2Chain(parallelReactor))
+                .addToChain(
+                        c1,
+                        C2Chain(parallelReactor),
+                        C3Chain(parallelReactor),
+                        C4Chain(parallelReactor)
+                )
 
         return a
                 .addToChain(

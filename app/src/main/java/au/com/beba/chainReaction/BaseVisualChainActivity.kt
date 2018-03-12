@@ -98,7 +98,7 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         topChain!!.setParentCallback(object : ChainCallback<Chain> {
             override fun onDone(completedChain: Chain) {
                 //DO SOMETHING ONCE ENTIRE CHAIN-REACTION HAS COMPLETED (SUCCESS / ERROR)
-                ConsoleLogger.log("", "done --> \"topChain\"")
+                ConsoleLogger.log("onDone", "topChain")
             }
         })
         chainExecutor.submit(topChain)
@@ -122,15 +122,10 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
 
     private fun drawChain(chain: Chain, parent: Chain?): BaseView? {
         ConsoleLogger.log("drawChain", "chain=%s".format(chain::class.java.simpleName))
-//        placeChainView(chain, parent)
-//        var newAnchor: BaseView? = placeChainView(chain, parent)
         var newAnchor: BaseView? = placeChainView(chain, parent)
 
         for (chainLink: Chain in chain.getChainLinks()) {
-            newAnchor = drawChain(chainLink, chain/*, getBottomReference()*/)
-//            newAnchor = drawChain(chainLink, chain, newAnchor)
-//            drawChain(chainLink, chain, newAnchor)
-//            bottomMost = newAnchor
+            newAnchor = drawChain(chainLink, chain)
         }
 
         return newAnchor
