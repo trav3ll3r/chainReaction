@@ -5,17 +5,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import au.com.beba.chainReaction.feature.BaseView
 import au.com.beba.chainReaction.feature.ChainView
 import au.com.beba.chainReaction.feature.ConnectorView
+import au.com.beba.chainReaction.feature.mockAppView.RequestValueListener
+import au.com.beba.chainReaction.feature.mockAppView.SelectLetterFragment
 import au.com.beba.chainReaction.testData.AbcChain
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
@@ -27,10 +31,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 const val CHAIN_REACTION_EVENT: String = "au.com.beba.chainReaction.CHAIN_REACTION_EVENT"
-const val CHAIN_CLASS: String = "au.com.beba.chainReaction.CHAIN_CLASS"
+const val CHAIN_REQUEST_ACTION: String = "au.com.beba.chainReaction.CHAIN_REQUEST_ACTION"
+const val CHAIN_TAG: String = "au.com.beba.chainReaction.CHAIN_TAG"
 const val CHAIN_EVENT: String = "au.com.beba.chainReaction.CHAIN_EVENT"
+const val CHAIN_REQUEST: String = "au.com.beba.chainReaction.CHAIN_REQUEST"
 
-abstract class BaseVisualChainActivity : AppCompatActivity() {
+abstract class BaseVisualChainActivity : AppCompatActivity(), RequestValueListener {
 
     protected open val tag: String = BaseVisualChainActivity::class.java.simpleName
 
@@ -43,17 +49,32 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
     private lateinit var inspectMainStatus: TextView
     private lateinit var inspectChainStatus: TextView
 
+    // APP UI
+    private lateinit var appUiContainer: FrameLayout
+
     private var bottomMost: BaseView? = null
 
     private val localBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val bundle = intent?.extras
             if (bundle != null) {
-                val chainTag = bundle[CHAIN_CLASS] as String
+                val chainTag = bundle[CHAIN_TAG] as String
                 val chainEvent = bundle[CHAIN_EVENT] as String
                 val chain = getChainByTag(chainTag, topChain!!)
                 Log.v(tag, "Received broadcast [%s]@%s [%s]".format(chainTag, chainEvent, chain?.getChainStatus()))
                 updateChainView(chain)
+            }
+        }
+    }
+
+    private val chainRequestsReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val bundle = intent?.extras
+            if (bundle != null) {
+                val chainTag = bundle[CHAIN_TAG] as String
+                val chainRequest = bundle[CHAIN_REQUEST] as String
+                Log.v(tag, "Broadcast: [%s] requires [%s]".format(chainTag, chainRequest))
+                showUiForChainRequest(chainTag, chainRequest)
             }
         }
     }
@@ -71,6 +92,8 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         inspectName = find(R.id.inspect_chain_name)
         inspectMainStatus = find(R.id.inspect_chain_main_task_status)
         inspectChainStatus = find(R.id.inspect_chain_status)
+
+        appUiContainer = find(R.id.app_ui_container)
     }
 
     override fun onDestroy() {
@@ -104,19 +127,26 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
         chainExecutor.submit(topChain)
     }
 
-    private var receiverRegistered: AtomicBoolean = AtomicBoolean(false)
+    private var receiversRegistered: AtomicBoolean = AtomicBoolean(false)
 
     private fun registerListener() {
-        if (!receiverRegistered.get()) {
-            receiverRegistered.getAndSet(true)
-            LocalBroadcastManager.getInstance(this).registerReceiver(localBroadcastReceiver, IntentFilter(CHAIN_REACTION_EVENT))
+        if (!receiversRegistered.get()) {
+            receiversRegistered.getAndSet(true)
+
+            with(LocalBroadcastManager.getInstance(this), {
+                registerReceiver(localBroadcastReceiver, IntentFilter(CHAIN_REACTION_EVENT))
+                registerReceiver(chainRequestsReceiver, IntentFilter(CHAIN_REQUEST_ACTION))
+            })
         }
     }
 
     private fun unregisterListener() {
-        if (receiverRegistered.get()) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(localBroadcastReceiver)
-            receiverRegistered.getAndSet(false)
+        if (receiversRegistered.get()) {
+            with(LocalBroadcastManager.getInstance(this)) {
+                unregisterReceiver(localBroadcastReceiver)
+                unregisterReceiver(chainRequestsReceiver)
+            }
+            receiversRegistered.getAndSet(false)
         }
     }
 
@@ -259,5 +289,27 @@ abstract class BaseVisualChainActivity : AppCompatActivity() {
 
     private fun getBottomReference(): BaseView? {
         return bottomMost
+    }
+
+    // APP UI METHODS
+    private fun showUiForChainRequest(chainTag: String, chainRequest: String) {
+        when (chainRequest) {
+            "LETTER" -> loadFragment(SelectLetterFragment.newInstance(chainTag, chainRequest))
+            else -> null
+        }
+    }
+
+    private fun loadFragment(fragment: Fragment) {
+        val t = supportFragmentManager.beginTransaction()
+        t.replace(appUiContainer.id, fragment)
+        t.commit()
+        appUiContainer.visibility = View.VISIBLE
+
+    }
+
+    override fun onValueSelected(chainTag: String, request: String, value: Any?) {
+        // FIND CHAIN
+        val chain: ChainWithRequest? = getChainByTag(chainTag, topChain!!) as ChainWithRequest?
+        chain?.acceptExternalValue(request, value)
     }
 }
