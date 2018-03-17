@@ -11,7 +11,7 @@ import au.com.beba.chainreaction.reactor.PassThroughReactor
 
 abstract class AbcChain(override val reactor: Reactor)
     : ChainWithRequest(reactor) {
-    protected open val status = ChainCallback.Status.SUCCESS
+    protected open var status = ChainCallback.Status.SUCCESS
     protected open var taskResult = "?"
     var defaultSleep: Long = 1000
     var sleepMultiplier: Long = 1

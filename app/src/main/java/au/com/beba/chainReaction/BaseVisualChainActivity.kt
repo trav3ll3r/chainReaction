@@ -20,7 +20,9 @@ import au.com.beba.chainReaction.feature.ChainView
 import au.com.beba.chainReaction.feature.ConnectorView
 import au.com.beba.chainReaction.feature.mockAppView.RequestValueListener
 import au.com.beba.chainReaction.feature.mockAppView.SelectLetterFragment
+import au.com.beba.chainReaction.feature.mockAppView.SelectNumberFragment
 import au.com.beba.chainReaction.testData.AbcChain
+import au.com.beba.chainReaction.testData.ChainRequestType
 import au.com.beba.chainreaction.chain.Chain
 import au.com.beba.chainreaction.chain.ChainCallback
 import au.com.beba.chainreaction.chain.ExecutionStrategy
@@ -292,11 +294,20 @@ abstract class BaseVisualChainActivity : AppCompatActivity(), RequestValueListen
     }
 
     // APP UI METHODS
+    protected fun showAppUi() {
+        appUiContainer.visibility = View.VISIBLE
+    }
+
     private fun showUiForChainRequest(chainTag: String, chainRequest: String) {
-        when (chainRequest) {
-            "LETTER" -> loadFragment(SelectLetterFragment.newInstance(chainTag, chainRequest))
-            else -> null
+        val requestType = ChainRequestType.valueOf(chainRequest)
+        when (requestType) {
+            ChainRequestType.LETTER -> loadFragment(SelectLetterFragment.newInstance(chainTag, chainRequest))
+            ChainRequestType.NUMBER -> loadFragment(SelectNumberFragment.newInstance(chainTag, chainRequest))
         }
+    }
+
+    private fun removeUi() {
+        appUiContainer.removeAllViews()
     }
 
     private fun loadFragment(fragment: Fragment) {
@@ -308,6 +319,7 @@ abstract class BaseVisualChainActivity : AppCompatActivity(), RequestValueListen
     }
 
     override fun onValueSelected(chainTag: String, request: String, value: Any?) {
+        removeUi()
         // FIND CHAIN
         val chain: ChainWithRequest? = getChainByTag(chainTag, topChain!!) as ChainWithRequest?
         chain?.acceptExternalValue(request, value)

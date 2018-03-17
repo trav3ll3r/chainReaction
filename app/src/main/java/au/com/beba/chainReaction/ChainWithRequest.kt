@@ -1,6 +1,7 @@
 package au.com.beba.chainReaction
 
 import android.content.Intent
+import au.com.beba.chainReaction.testData.ChainRequestType
 import au.com.beba.chainreaction.chain.BaseChain
 import au.com.beba.chainreaction.chain.Reactor
 import au.com.beba.chainreaction.logger.ConsoleLogger
@@ -16,18 +17,22 @@ abstract class ChainWithRequest(override val reactor: Reactor = BaseReactorWithP
     override val TAG: String = ChainWithRequest::class.java.simpleName
 
     private lateinit var latch: CountDownLatch
-    private val requestBucket: HashMap<String, Any?> = HashMap()
+    private var requestBucket: HashMap<String, String?> = HashMap()
 
-    protected fun requestExternalValue(request: String): Any? {
-        if (requestBucket[request] == null) {
+    protected fun resetRequests() {
+        requestBucket = HashMap()
+    }
+
+    protected fun requestExternalValue(request: ChainRequestType): String {
+        if (requestBucket[request.name] == null) {
             latch = CountDownLatch(1)
-            broadcastRequest(request)
+            broadcastRequest(request.name)
 
             ConsoleLogger.log(TAG, "Awaiting on request for [%s]".format(request))
             latch.await()
             ConsoleLogger.log(TAG, "Resuming after receiving request")
         }
-        return requestBucket[request]
+        return requestBucket[request.name] as String
     }
 
     private fun broadcastRequest(request: String) {
@@ -43,7 +48,7 @@ abstract class ChainWithRequest(override val reactor: Reactor = BaseReactorWithP
 
     fun acceptExternalValue(request: String, value: Any?) {
         ConsoleLogger.log(TAG, "acceptExternalValue | request[%s] value".format(request, value))
-        requestBucket[request] = value
+        requestBucket[request] = value.toString()
         latch.countDown()
     }
 }
