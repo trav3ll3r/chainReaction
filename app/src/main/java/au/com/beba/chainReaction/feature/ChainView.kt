@@ -26,7 +26,6 @@ class ChainView : BaseView {
     private lateinit var startContentGuideline: Guideline
     private lateinit var endContentGuideline: Guideline
 
-    private lateinit var chainDuration: TextView
     private lateinit var chainName: TextView
     private lateinit var cardView: View
     private lateinit var innerContent: ConstraintLayout
@@ -51,7 +50,6 @@ class ChainView : BaseView {
         startContentGuideline = find(R.id.start_content)
         endContentGuideline = find(R.id.end_content)
 
-        this.chainDuration = find(R.id.execution_duration)
         this.chainName = find(R.id.chain_name)
         this.chainProgress = find(R.id.chain_progress)
         this.cardView = find(R.id.card_view)
@@ -62,7 +60,6 @@ class ChainView : BaseView {
     fun update(chain: AbcChain) {
         //Log.d(tag, "Update for [%s] with status [%s]".format(chain::class.java.simpleName, chain.getChainStatus()))
         this.chainName.text = chain.chainId
-        this.chainDuration.text = chain.getSleepTime().toString()
 
         chainProgress.backgroundColor = resources.getColor(
                 when (chain.getChainStatus()) {

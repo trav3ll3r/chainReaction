@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
         find<Button>(R.id.btn_static_mixed).setOnClickListener { staticMixed() }
         find<Button>(R.id.btn_add_serial).setOnClickListener { addSerial() }
         find<Button>(R.id.btn_multi_parallel).setOnClickListener { multiParallel() }
+        find<Button>(R.id.btn_request_values).setOnClickListener { stopForRequestValues() }
     }
 
     private fun staticMixed() {
@@ -29,6 +30,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun multiParallel() {
         val intent = Intent(this, MultiParallelChainActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun stopForRequestValues() {
+        val intent = Intent(this, StopForUiChainActivity::class.java)
         startActivity(intent)
     }
 

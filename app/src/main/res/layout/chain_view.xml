@@ -45,6 +45,30 @@
             android:padding="0dp"
             >
 
+            <LinearLayout
+                android:id="@+id/chain_steps"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:orientation="horizontal"
+                android:background="@color/status_not_started"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:visibility="gone"
+                >
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    />
+
+            </LinearLayout>
+
             <View
                 android:id="@+id/chain_progress"
                 android:layout_width="0dp"
@@ -68,19 +92,6 @@
                 android:textSize="@dimen/chain_name"
                 android:textColor="@color/chainText"
                 tools:text="AChain"
-                />
-            <TextView
-                android:id="@+id/execution_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                android:textSize="@dimen/duration_size"
-                android:textColor="@color/chainText"
-                android:padding="@dimen/chain_view_padding"
-                tools:text="500"
-                android:visibility="gone"
-                tools:visibility="visible"
                 />
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>

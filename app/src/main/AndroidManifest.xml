@@ -23,6 +23,7 @@
 
         <activity android:name=".AddSerialToChainActivity"/>
         <activity android:name=".MultiParallelChainActivity" />
+        <activity android:name=".StopForUiChainActivity" />
     </application>
 
 </manifest>
