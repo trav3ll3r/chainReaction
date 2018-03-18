@@ -45,40 +45,18 @@
             android:padding="0dp"
             >
 
-            <LinearLayout
-                android:id="@+id/chain_steps"
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:orientation="horizontal"
-                android:background="@color/status_not_started"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                android:visibility="gone"
-                >
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    />
-
-            </LinearLayout>
-
             <View
-                android:id="@+id/chain_progress"
+                android:id="@+id/chain_final_status"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="@color/status_not_started"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
                 />
+
+            <include layout="@layout/chain_view_progress" />
 
             <TextView
                 android:id="@+id/chain_name"

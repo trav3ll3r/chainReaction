@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chain_steps"
+    android:layout_width="0dp"
+    android:layout_height="20dp"
+    android:orientation="horizontal"
+    android:background="@color/status_not_started"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    android:visibility="visible">
+    <TextView
+        android:id="@+id/chain_step_premain"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_main"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_postmain"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_links"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_reactions"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_decision"
+        style="@style/chain_view_step_style"
+        />
+    <TextView
+        android:id="@+id/chain_step_finish"
+        style="@style/chain_view_step_style"
+        />
+</LinearLayout>
