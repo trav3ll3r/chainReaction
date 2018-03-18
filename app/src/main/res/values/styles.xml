@@ -8,4 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="chain_view_step_style">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:text">0</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:background">@drawable/square_frame</item>
+    </style>
+
 </resources>

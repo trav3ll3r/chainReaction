@@ -65,6 +65,7 @@ abstract class BaseVisualChainActivity : AppCompatActivity(), RequestValueListen
                 val chain = getChainByTag(chainTag, topChain!!)
                 Log.v(tag, "Received broadcast [%s]@%s [%s]".format(chainTag, chainEvent, chain?.getChainStatus()))
                 updateChainView(chain)
+                updateChainProgress(chain, chainEvent)
             }
         }
     }
@@ -266,6 +267,15 @@ abstract class BaseVisualChainActivity : AppCompatActivity(), RequestValueListen
                 if (baseView is ChainView) {
                     baseView.update(chain)
                 }
+            }
+        }
+    }
+
+    private fun updateChainProgress(chain: Chain?, currentStep: String) {
+        if (chain is Chain) {
+            val baseView = getChainViewByTag(canvas, buildChainTag(chain))
+            if (baseView is ChainView) {
+                baseView.updateProgress(currentStep)
             }
         }
     }

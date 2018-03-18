@@ -7,6 +7,7 @@
     <color name="chainBackground">#7777ee</color>
     <color name="chainText">#1e1e1e</color>
 
+    <color name="step_visited">#99a8fa</color>
     <color name="status_border">#333</color>
     <color name="status_border_plan">#d6d6d6</color>
     <color name="status_not_started">#eee</color>
