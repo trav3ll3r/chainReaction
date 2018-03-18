@@ -19,6 +19,7 @@ interface Chain : Callable<Any?> {
     fun getMainTaskStatus(): ChainCallback.Status
     fun getChainStatus(): ChainCallback.Status
     fun setChainStatus(newStatus: ChainCallback.Status)
+    fun startingNextStep(nextStep: String?)
 }
 
 enum class ExecutionStrategy {

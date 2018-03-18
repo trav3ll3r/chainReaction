@@ -64,6 +64,7 @@ abstract class BaseChain(override val reactor: Reactor = BaseReactorWithPhases()
 
     private fun advanceStep(fromStep: String?) {
         val nextStep = reactor.chainStepSwitcher.switchNext(links, fromStep)
+        startingNextStep(nextStep)
         when (nextStep) {
             STEP_PRE_MAIN -> preMainTaskPhase()
             STEP_MAIN -> mainTaskPhase()
